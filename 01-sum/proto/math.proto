@@ -14,5 +14,5 @@ message SumResult
 }
 
 service MathServices{
-    rpc computeSum(SumOperand) returns (SumResult) {}
+    rpc ComputeSum(SumOperand) returns (SumResult) {}
 }
