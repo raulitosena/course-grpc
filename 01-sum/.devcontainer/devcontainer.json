@@ -1,0 +1,31 @@
+{
+	"name": "dev-station",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".."
+	},
+	"forwardPorts": [
+        5000
+    ],
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.shell.linux": "/bin/bash",
+				"C_Cpp.intelliSenseEngine": "default",
+				"cmake.configureOnOpen": true
+			},
+			"extensions": [
+				"ms-vscode.cmake-tools",
+				"ms-vscode.cpptools",
+				"ms-python.python",
+				"ms-python.debugpy",
+				"ms-python.vscode-pylance",
+				"zxh404.vscode-proto3",
+				"PKief.material-icon-theme"
+			]
+		}
+	},
+	
+	"remoteUser": "developer",
+	"postCreateCommand": "echo 'Development container ready!'"
+}

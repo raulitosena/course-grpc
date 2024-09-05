@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package math;
+
+message SumOperand
+{
+    float op1 = 1;
+    float op2 = 2;
+}
+
+message SumResult
+{
+    float result = 1;
+}
+
+service MathServices{
+    rpc computeSum(SumOperand) returns (SumResult) {}
+}
