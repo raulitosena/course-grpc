@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package math;
+
+message AvgSample
+{
+    float sample = 1;
+}
+
+message AvgTotal
+{
+    float result = 1;
+}
+
+service AverageServices{
+    rpc ComputeAvg(stream AvgSample) returns (AvgTotal) {}
+}
