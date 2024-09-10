@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(gRPC)
+project(02-fibonacci)
 set (SERVER_NAME server)
 set (CLIENT_NAME client)
 
@@ -19,7 +19,7 @@ file(GLOB PROTO_SRCS "${CMAKE_CURRENT_LIST_DIR}/proto/*.cc")
 add_custom_target(pre_build_commands
 	COMMAND protoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/proto --cpp_out=${CMAKE_CURRENT_LIST_DIR}/proto ${CMAKE_CURRENT_LIST_DIR}/proto/*.proto 
 	COMMAND protoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/proto --grpc_out=${CMAKE_CURRENT_LIST_DIR}/proto --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ${CMAKE_CURRENT_LIST_DIR}/proto/*.proto 
-	COMMENT "Generating code from .proto files..."
+	COMMENT "Generating protocol buffers and gRPC services..."
 )
 
 add_executable(${SERVER_NAME}
@@ -32,11 +32,11 @@ add_executable(${CLIENT_NAME}
 	${PROTO_SRCS}
 )
 
-# server dependency - protoc compilation & gRPC library
+# serversum dependency - protoc compilation & gRPC library
 add_dependencies(${SERVER_NAME} pre_build_commands)
 target_link_libraries(${SERVER_NAME} gRPC::grpc++)
 
-# client dependency - protoc compilation
+# clientsum dependency - protoc compilation
 add_dependencies(${CLIENT_NAME} pre_build_commands)
 target_link_libraries(${CLIENT_NAME} gRPC::grpc++)
 

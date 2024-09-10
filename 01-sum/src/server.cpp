@@ -1,13 +1,13 @@
 #include <iostream>
 #include <grpcpp/grpcpp.h>
-#include <proto/math.grpc.pb.h>
-#include <proto/math.pb.h>
+#include <proto/sum.pb.h>
+#include <proto/sum.grpc.pb.h>
 
 
 
-class MathServicesImpl : public math::MathServices::Service
+class SumServicesImpl : public sum::SumServices::Service
 {
-	::grpc::Status ComputeSum(::grpc::ServerContext* context, const ::math::SumOperand* request, ::math::SumResult* response)
+	::grpc::Status ComputeSum(::grpc::ServerContext* context, const ::sum::SumOperand* request, ::sum::SumResult* response)
 	{
 		float result = request->op1() + request->op2();
 		response->set_result(result);
@@ -18,7 +18,7 @@ class MathServicesImpl : public math::MathServices::Service
 int main()
 {
 	printf("SUM server running... \n");
-	MathServicesImpl service;
+	SumServicesImpl service;
 	grpc::ServerBuilder builder;
 	builder.AddListeningPort("localhost:5000", grpc::InsecureServerCredentials());
 	builder.RegisterService(&service);

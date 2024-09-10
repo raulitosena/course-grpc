@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package math;
+package sum;
 
 message SumOperand
 {
@@ -13,6 +13,6 @@ message SumResult
     float result = 1;
 }
 
-service MathServices{
+service SumServices{
     rpc ComputeSum(SumOperand) returns (SumResult) {}
 }

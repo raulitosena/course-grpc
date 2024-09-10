@@ -1,11 +1,11 @@
 {
-	"name": "dev-station",
+	"name": "grpc-img",
 	"build": {
 		"dockerfile": "Dockerfile",
 		"context": ".."
 	},
 	"forwardPorts": [
-        5000
+        5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009
     ],
 	"customizations": {
 		"vscode": {
@@ -17,6 +17,7 @@
 			"extensions": [
 				"ms-vscode.cmake-tools",
 				"ms-vscode.cpptools",
+				"ms-vscode.cpptools-extension-pack",
 				"ms-python.python",
 				"ms-python.debugpy",
 				"ms-python.vscode-pylance",
@@ -26,6 +27,5 @@
 		}
 	},
 	
-	"remoteUser": "developer",
-	"postCreateCommand": "echo 'Development container ready!'"
+	"remoteUser": "ubuntu"
 }

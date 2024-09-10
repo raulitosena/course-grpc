@@ -27,7 +27,7 @@ public:
 		// else 
 		// {
 		// 	std::cerr << "RPC failed" << std::endl;
-		// 	return 0;
+		 	return 0;
 		// }
 	}
 
