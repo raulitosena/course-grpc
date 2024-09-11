@@ -30,13 +30,10 @@ public:
 
 		grpc::Status status = reader->Finish();
 
-		if (status.ok()) 
+		if (!status.ok()) 
 		{
-			std::cout << "RPC succeeded." << std::endl;
-		} 
-		else 
-		{
-			std::cout << "RPC failed." << std::endl;
+			std::cerr << "RPC failed." << std::endl;
+			return {};
 		}
 
 		return fib_sequence;
@@ -47,18 +44,28 @@ private:
 };
 
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-	auto channel = grpc::CreateChannel("localhost:5000", grpc::InsecureChannelCredentials());
+	if (argc != 3)
+	{
+		std::cerr << "Invalid parameter!" << std::endl;
+		return 1001;
+	}
+
+	auto host = (argv[1];
+	auto limit = std::stoul(argv[2]);
+
+	auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
 	FibonacciClient client(channel);
-	unsigned int number = 4;
-	auto fib_sequence = client.GetFibonacciSequence(number);
+	auto fib_sequence = client.GetFibonacciSequence(limit);
 
 	std::cout << "From Fibonacci server: ";
 	for (auto &&val : fib_sequence)
 	{
-		std::cout << val << " ";				
+		std::cout << val << " ";
 	}
+
+	std::cout << std::endl;
 
 	return 0;
 }

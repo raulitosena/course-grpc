@@ -37,38 +37,37 @@ std::vector<uint32_t> GenerateFibonacci(uint32_t n)
 
 class FibonacciServicesImpl : public fibonacci::FibonacciServices::Service
 {
- 	::grpc::Status GetFibonacciSequence(::grpc::ServerContext* context, const ::fibonacci::FibonacciRequest* request, ::fibonacci::FibonacciResponse* response)
- 	{
+	::grpc::Status GetFibonacciSequence(::grpc::ServerContext* context, const ::fibonacci::FibonacciRequest* request, grpc::ServerWriter<fibonacci::FibonacciResponse>* writer)
+	{
 		unsigned int number = request->number();
+		std::cout << "Received on server: " << number << std::endl;
 
-		//std::vector<uint32_t> fibonacci = GenerateFibonacci(number);
-		std::vector<uint32_t> fibonacci = { 1, 2 , 3 };
-
+		std::vector<uint32_t> fibonacci = GenerateFibonacci(number);
 		for (uint32_t i = 0; i < fibonacci.size(); ++i) 
 		{
-			response->set_number(fibonacci.at(i));
+			::fibonacci::FibonacciResponse response;
+			response.set_number(fibonacci.at(i));
+			writer->Write(response);
 		}
-		
+
 		return grpc::Status::OK;
- 	}
+	}
 };
 
-int main()
+int main(int argc, char** argv)
 {
-	printf("Fibonacci server running... \n");
+	if (argc != 2)
+	{
+		std::cerr << "Invalid parameter!" << std::endl;
+		return 1001;
+	}
+
+	printf("Fibonacci server running on %s ... \n", argv[1]);
 	FibonacciServicesImpl service;
 	grpc::ServerBuilder builder;
-	builder.AddListeningPort("localhost:5000", grpc::InsecureServerCredentials());
+	builder.AddListeningPort(argv[1], grpc::InsecureServerCredentials());
 	builder.RegisterService(&service);
 	auto server(builder.BuildAndStart());
 	server->Wait();
-
-	for (size_t i = 0; i < 10; i++)
-	{
-		printf("ok\n");
-		/* code */
-	}
-	
-
 	return 0;
 }
