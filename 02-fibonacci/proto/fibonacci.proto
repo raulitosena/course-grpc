@@ -4,14 +4,14 @@ package fibonacci;
 
 message FibonacciRequest
 {
-    uint32 number = 1;
+    uint32 value = 1;
 }
 
 message FibonacciResponse
 {
-    uint32 number = 1;
+    uint32 value = 1;
 }
 
-service FibonacciServices{
+service FibonacciService{
     rpc GetFibonacciSequence(FibonacciRequest) returns (stream FibonacciResponse) {}
 }
