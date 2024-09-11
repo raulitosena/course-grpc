@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 
 # Install necessary packages
-RUN apt update && apt install -y cmake build-essential git git-flow autoconf libtool pkg-config sudo
+RUN apt update && apt install -y cmake build-essential gdb git git-flow autoconf libtool pkg-config sudo
 
 # Set the environment variables for gRPC build
 ENV SOURCES_DIR=/tmp/grpc_sources

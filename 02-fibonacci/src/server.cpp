@@ -41,13 +41,15 @@ class FibonacciServicesImpl : public fibonacci::FibonacciServices::Service
  	{
 		unsigned int number = request->number();
 
-		std::vector<uint32_t> fibonacci = GenerateFibonacci(number);
+		//std::vector<uint32_t> fibonacci = GenerateFibonacci(number);
+		std::vector<uint32_t> fibonacci = { 1, 2 , 3 };
 
 		for (uint32_t i = 0; i < fibonacci.size(); ++i) 
 		{
 			response->set_number(fibonacci.at(i));
-			return grpc::Status::OK;
 		}
+		
+		return grpc::Status::OK;
  	}
 };
 
@@ -60,6 +62,13 @@ int main()
 	builder.RegisterService(&service);
 	auto server(builder.BuildAndStart());
 	server->Wait();
+
+	for (size_t i = 0; i < 10; i++)
+	{
+		printf("ok\n");
+		/* code */
+	}
+	
 
 	return 0;
 }
