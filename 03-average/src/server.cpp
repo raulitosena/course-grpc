@@ -1,29 +1,48 @@
 #include <iostream>
 #include <grpcpp/grpcpp.h>
-#include <proto/average.grpc.pb.h>
 #include <proto/average.pb.h>
+#include <proto/average.grpc.pb.h>
 
 
-
-// class MathServicesImpl : public average::MathServices::Service
-// {
-// 	::grpc::Status ComputeSum(::grpc::ServerContext* context, const ::average::SumOperand* request, ::average::SumResult* response)
-// 	{
-// 		float result = request->op1() + request->op2();
-// 		response->set_result(result);
-// 		return grpc::Status::OK;
-// 	}
-// };
-
-int main()
+class AverageServiceImpl : public average::AverageService::Service
 {
-	// printf("SUM server running... \n");
-	// MathServicesImpl service;
-	// grpc::ServerBuilder builder;
-	// builder.AddListeningPort("localhost:5000", grpc::InsecureServerCredentials());
-	// builder.RegisterService(&service);
-	// auto server(builder.BuildAndStart());
-	// server->Wait();
+	grpc::Status ComputeAvg(grpc::ServerContext* context, grpc::ServerReader<::average::AvgSample>* reader, ::average::AvgTotal* response) override
+	{
+		::average::AvgSample sample;
+		float sum = 0;
+		int point_count = 0;
 
+		while (reader->Read(&sample))
+		{
+			sum += sample.value();
+      		point_count++;
+		}
+
+		float result = 0;
+		
+		if (point_count > 0)
+			result = sum/point_count;
+
+		response->set_value(result);
+		return grpc::Status::OK;
+	}
+};
+
+int main(int argc, char** argv)
+{
+	if (argc != 2)
+	{
+		std::cerr << "Missing parameters!" << std::endl;
+		return 1001;
+	}
+
+	std::string host = argv[1];
+	AverageServiceImpl service;
+	grpc::ServerBuilder builder;
+	builder.AddListeningPort(host, grpc::InsecureServerCredentials());
+	builder.RegisterService(&service);
+	auto server(builder.BuildAndStart());
+	printf("Average server running on %s ... \n", host.c_str());
+	server->Wait();
 	return 0;
 }
