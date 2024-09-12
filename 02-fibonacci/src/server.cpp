@@ -62,12 +62,15 @@ int main(int argc, char** argv)
 	}
 
 	std::string host = argv[1];
+	
 	FibonacciServiceImpl service;
 	grpc::ServerBuilder builder;
 	builder.AddListeningPort(host, grpc::InsecureServerCredentials());
 	builder.RegisterService(&service);
 	auto server(builder.BuildAndStart());
-	printf("Fibonacci server running on %s ... \n", host.c_str());
+	std::cout << "Fibonacci server running on " << host << " ..." << std::endl;
+	
 	server->Wait();
+
 	return 0;
 }

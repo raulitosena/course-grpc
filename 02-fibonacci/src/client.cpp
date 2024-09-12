@@ -5,22 +5,18 @@
 
 class FibonacciClient {
 public:
-	explicit FibonacciClient(std::shared_ptr<grpc::Channel> channel) : stub_(fibonacci::FibonacciService::NewStub(channel))
+	explicit FibonacciClient(std::shared_ptr<grpc::Channel> channel) : stub(fibonacci::FibonacciService::NewStub(channel))
 	{		
 	}
 
 	std::vector<unsigned int> GetFibonacciSequence(unsigned int num) 
 	{
-		//grpc::Status status;
         grpc::ClientContext context;
-
-		// RPC request
-	 	fibonacci::FibonacciRequest request;		
-	 	request.set_value(num);
-
-		// RPC responses
+	 	fibonacci::FibonacciRequest request;
 		fibonacci::FibonacciResponse response;
-		std::unique_ptr< grpc::ClientReader<fibonacci::FibonacciResponse> > reader(stub_->GetFibonacciSequence(&context, request));
+
+	 	request.set_value(num);
+		std::unique_ptr< grpc::ClientReader<fibonacci::FibonacciResponse> > reader(this->stub->GetFibonacciSequence(&context, request));
 		std::vector<unsigned int> sequence;
 			
         while (reader->Read(&response))
@@ -32,7 +28,7 @@ public:
 
 		if (!status.ok()) 
 		{
-			std::cerr << "RPC failed." << std::endl;
+			std::cerr << "RPC failed: " << status.error_message() << std::endl;
             return {};
         }
 
@@ -40,9 +36,8 @@ public:
     }
 
 private:
-	std::unique_ptr<fibonacci::FibonacciService::Stub> stub_;
+	std::unique_ptr<fibonacci::FibonacciService::Stub> stub;
 };
-
 
 int main(int argc, char** argv)
 {
