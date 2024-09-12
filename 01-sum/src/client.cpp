@@ -5,7 +5,7 @@
 
 class SumClient {
 public:
-	SumClient(std::shared_ptr<grpc::Channel> channel) : stub_(::sum::SumServices::NewStub(channel)) 
+	explicit SumClient(std::shared_ptr<grpc::Channel> channel) : stub_(::sum::SumServices::NewStub(channel)) 
 	{		
 	}
 
