@@ -36,7 +36,7 @@ std::vector<uint32_t> GenerateFibonacci(uint32_t limit)
 
 class FibonacciServiceImpl : public fibonacci::FibonacciService::Service
 {
-	grpc::Status GetFibonacciSequence(grpc::ServerContext* context, const ::fibonacci::FibonacciRequest* request, grpc::ServerWriter<fibonacci::FibonacciResponse>* writer)
+	grpc::Status GetFibonacciSequence(grpc::ServerContext* context, const fibonacci::FibonacciRequest* request, grpc::ServerWriter<fibonacci::FibonacciResponse>* writer) override
 	{
 		unsigned int value = request->value();
 		std::cout << "Received on server: " << value << std::endl;
@@ -44,7 +44,7 @@ class FibonacciServiceImpl : public fibonacci::FibonacciService::Service
 		std::vector<uint32_t> fibonacci = GenerateFibonacci(value);
 		for (uint32_t i = 0; i < fibonacci.size(); i++) 
 		{
-			::fibonacci::FibonacciResponse response;
+			fibonacci::FibonacciResponse response;
 			response.set_value(fibonacci.at(i));
 			writer->Write(response);
 		}
