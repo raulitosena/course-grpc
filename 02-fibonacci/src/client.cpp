@@ -1,48 +1,66 @@
 #include <grpcpp/grpcpp.h>
-#include <proto/fibonacci.grpc.pb.h>
 #include <proto/fibonacci.pb.h>
+#include <proto/fibonacci.grpc.pb.h>
 
 
 class FibonacciClient {
 public:
-	FibonacciClient(std::shared_ptr<grpc::Channel> channel) : stub_(::fibonacci::FibonacciServices::NewStub(channel))
+	explicit FibonacciClient(std::shared_ptr<grpc::Channel> channel) : stub(fibonacci::FibonacciService::NewStub(channel))
 	{		
 	}
 
-	unsigned int GetFibonacciSequence(unsigned int num) 
+	std::vector<unsigned int> GetFibonacciSequence(unsigned int num) 
 	{
-	 	// ::fibonacci::FibonacciRequest request;		
-	 	// request.set_number(num);
+        grpc::ClientContext context;
+	 	fibonacci::FibonacciRequest request;
+		fibonacci::FibonacciResponse response;
 
-	 	// ::fibonacci::FibonacciResponse response;
-	 	// grpc::ClientContext context;
-		// grpc::Status status ;
-		// //stub_->GetFibonacciSequence(&context, request);
-		// //stub_->GetFibonacciSequence(&context, request, &response);
+	 	request.set_value(num);
+		std::unique_ptr< grpc::ClientReader<fibonacci::FibonacciResponse> > reader(this->stub->GetFibonacciSequence(&context, request));
+		std::vector<unsigned int> sequence;
+			
+        while (reader->Read(&response))
+		{
+			sequence.push_back(response.value());
+        }
 
-		// if (status.ok()) 
-		// {
-		// 	return response.number();
-		// }
-		// else 
-		// {
-		// 	std::cerr << "RPC failed" << std::endl;
-		 	return 0;
-		// }
-	}
+        grpc::Status status = reader->Finish();
+
+		if (!status.ok()) 
+		{
+			std::cerr << "RPC failed: " << status.error_message() << std::endl;
+            return {};
+        }
+
+		return sequence;
+    }
 
 private:
-	std::unique_ptr<::fibonacci::FibonacciServices::Stub> stub_;
+	std::unique_ptr<fibonacci::FibonacciService::Stub> stub;
 };
 
-
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-	auto channel = grpc::CreateChannel("localhost:5000", grpc::InsecureChannelCredentials());
+	if (argc != 3)
+	{
+		std::cerr << "Missing parameters!" << std::endl;
+		return 1001;
+	}
+
+	std::string host = argv[1];
+	uint32_t limit = std::stoul(argv[2]);
+
+	auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
 	FibonacciClient client(channel);
-	unsigned int number = 4;
-	auto response = client.GetFibonacciSequence(number);	
-	std::cout << "From Fibonacci server: " << response << std::endl;
+	auto sequence = client.GetFibonacciSequence(limit);
+
+	std::cout << "From Fibonacci server: ";
+	for (auto &&val : sequence)
+	{
+		std::cout << val << " ";
+	}
+
+	std::cout << std::endl;
 
 	return 0;
 }

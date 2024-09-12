@@ -5,19 +5,19 @@
 
 class SumClient {
 public:
-	SumClient(std::shared_ptr<grpc::Channel> channel) : stub_(::sum::SumServices::NewStub(channel)) 
+	explicit SumClient(std::shared_ptr<grpc::Channel> channel) : stub(sum::SumService::NewStub(channel)) 
 	{		
 	}
 
-	float ComputeSum(float op1, float op2) 
+	int ComputeSum(int op1, int op2) 
 	{
-		::sum::SumOperand request;		
-		request.set_op1(op1);
-		request.set_op2(op2);
-
-		::sum::SumResult response;
 		grpc::ClientContext context;
-		grpc::Status status = stub_->ComputeSum(&context, request, &response);
+		sum::SumOperand request;		
+		sum::SumResult response;
+
+		request.set_op1(op1);
+		request.set_op2(op2);		
+		grpc::Status status = this->stub->ComputeSum(&context, request, &response);
 
 		if (status.ok()) 
 		{
@@ -31,17 +31,25 @@ public:
 	}
 
 private:
-	std::unique_ptr<::sum::SumServices::Stub> stub_;
+	std::unique_ptr<sum::SumService::Stub> stub;
 };
 
 int main(int argc, char** argv) 
 {
-	auto channel = grpc::CreateChannel("localhost:5000", grpc::InsecureChannelCredentials());
+	if (argc != 4)
+	{
+		std::cerr << "Missing parameters!" << std::endl;
+		return 1001;
+	}
+
+	std::string host = argv[1];
+	int op1 = std::stoi(argv[2]);
+	int op2 = std::stoi(argv[3]);
+
+	auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
 	SumClient client(channel);
-	float op1 = 10.0;
-	float op2 = 20.0;
-	float result = client.ComputeSum(op1, op2);	
-	std::cout << "The sum of " << op1 << " and " << op2 << " is " << result << std::endl;
+	int result = client.ComputeSum(op1, op2);	
+	std::cout << op1 << " + " << op2 << " = " << result << std::endl;
 
 	return 0;
 }
