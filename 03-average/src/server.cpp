@@ -6,20 +6,24 @@
 
 class AverageServiceImpl : public average::AverageService::Service
 {
-	grpc::Status ComputeAvg(grpc::ServerContext* context, grpc::ServerReader<::average::AvgSample>* reader, ::average::AvgTotal* response) override
+	grpc::Status ComputeAvg(grpc::ServerContext* context, grpc::ServerReader<average::AvgSample>* reader, average::AvgTotal* response) override
 	{
-		::average::AvgSample sample;
+		average::AvgSample sample;
 		float sum = 0;
 		int point_count = 0;
+
+		std::cout << "Samples: ";
 
 		while (reader->Read(&sample))
 		{
 			sum += sample.value();
-      		point_count++;
+			point_count++;
+			std::cout << sample.value() << " " << std::flush;
 		}
 
-		float result = 0;
-		
+		std::cout << std::endl;
+
+		float result = 0;		
 		if (point_count > 0)
 			result = sum/point_count;
 
@@ -37,12 +41,15 @@ int main(int argc, char** argv)
 	}
 
 	std::string host = argv[1];
+	
 	AverageServiceImpl service;
 	grpc::ServerBuilder builder;
 	builder.AddListeningPort(host, grpc::InsecureServerCredentials());
 	builder.RegisterService(&service);
 	auto server(builder.BuildAndStart());
-	printf("Average server running on %s ... \n", host.c_str());
+	std::cout << "Average server running on " << host << " ..." << std::endl;
+	
 	server->Wait();
+
 	return 0;
 }
