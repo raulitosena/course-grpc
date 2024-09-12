@@ -4,15 +4,16 @@ package sum;
 
 message SumOperand
 {
-    float op1 = 1;
-    float op2 = 2;
+	int32 op1 = 1;
+	int32 op2 = 2;
 }
 
 message SumResult
 {
-    float result = 1;
+	int32 result = 1;
 }
 
-service SumServices{
-    rpc ComputeSum(SumOperand) returns (SumResult) {}
+service SumService
+{
+	rpc ComputeSum(SumOperand) returns (SumResult) {}
 }

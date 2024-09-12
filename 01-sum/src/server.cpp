@@ -4,10 +4,9 @@
 #include <proto/sum.grpc.pb.h>
 
 
-
-class SumServicesImpl : public sum::SumServices::Service
+class SumServiceImpl : public sum::SumService::Service
 {
-	::grpc::Status ComputeSum(::grpc::ServerContext* context, const ::sum::SumOperand* request, ::sum::SumResult* response) override
+	grpc::Status ComputeSum(grpc::ServerContext* context, const sum::SumOperand* request, sum::SumResult* response) override
 	{
 		float result = request->op1() + request->op2();
 		response->set_result(result);
@@ -15,14 +14,23 @@ class SumServicesImpl : public sum::SumServices::Service
 	}
 };
 
-int main()
+int main(int argc, char** argv)
 {
-	printf("SUM server running... \n");
-	SumServicesImpl service;
+	if (argc != 2)
+	{
+		std::cerr << "Missing parameters!" << std::endl;
+		return 1001;
+	}
+
+	std::string host = argv[1];
+
+	SumServiceImpl service;
 	grpc::ServerBuilder builder;
-	builder.AddListeningPort("localhost:5000", grpc::InsecureServerCredentials());
+	builder.AddListeningPort(host, grpc::InsecureServerCredentials());
 	builder.RegisterService(&service);
 	auto server(builder.BuildAndStart());
+	std::cout << "Sum server running on " << host << " ..." << std::endl;
+
 	server->Wait();
 
 	return 0;
