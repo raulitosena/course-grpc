@@ -55,7 +55,6 @@ int main(int argc, char** argv)
 
 	auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
 	AverageClient client(channel);
-
 	std::vector<int> samples = { 1, 2, 3, 4 };
 	float average = client.ComputeAverage(samples);
 	std::cout << "Average: " << average << std::endl;
