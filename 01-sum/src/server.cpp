@@ -7,7 +7,7 @@
 
 class SumServicesImpl : public sum::SumServices::Service
 {
-	::grpc::Status ComputeSum(::grpc::ServerContext* context, const ::sum::SumOperand* request, ::sum::SumResult* response)
+	::grpc::Status ComputeSum(::grpc::ServerContext* context, const ::sum::SumOperand* request, ::sum::SumResult* response) override
 	{
 		float result = request->op1() + request->op2();
 		response->set_result(result);
