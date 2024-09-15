@@ -2,6 +2,7 @@
 #include <proto/sum.pb.h>
 #include <proto/sum.grpc.pb.h>
 #include <thread>
+#include "absl/log/check.h"
 
 
 class SumClient
@@ -27,35 +28,28 @@ public:
 
     	std::unique_ptr<grpc::ClientAsyncResponseReader<sum::SumResult>> rpc(this->stub->AsyncComputeSum(&context, request, &cq));
 
-		rpc->Finish(&response, &status, (void*)1);
-
+		void* tag_id = (void*) 0x12345;
+		// Request that, upon completion of the RPC, "reply" be updated with the
+		// server's response; "status" with the indication of whether the operation
+		// was successful. Tag the request with the integer 0x12345.
+		rpc->Finish(&response, &status, tag_id);
 		void* got_tag;
 		bool ok = false;
+		// Block until the next result is available in the completion queue "cq".
+		// The return value of Next should always be checked. This return value
+		// tells us whether there is any kind of event or the cq_ is shutting down.
+		CHECK(cq.Next(&got_tag, &ok));
+		// Verify that the result from "cq" corresponds, by its tag, our previous
+		// request.
+		CHECK_EQ(got_tag, tag_id);
+		// ... and that the request was completed successfully. Note that "ok"
+		// corresponds solely to the request for updates introduced by Finish().
+		CHECK(ok);
 
-		while (cq.Next(&got_tag, &ok))
-		{	
-			if (got_tag == (void*)1) 
-			{
-				if (!ok)
-					break;
-				
-				// check reply and status
-				if (status.ok()) 
-				{
-					return response.result();
-				}
-				else 
-				{
-					std::cerr << "RPC failed: " << status.error_message() << std::endl;
-					return 0;
-				}
-			}
-
-			std::cout << "." << std::flush;
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-		}
-
-		return 0;
+		if (status.ok())
+			return response.result();
+		else
+			throw std::runtime_error("RPC failed: " + status.error_message());
 	}
 
 private:
@@ -66,18 +60,25 @@ int main(int argc, char** argv)
 {
 	if (argc != 4)
 	{
-		std::cerr << "Missing parameters!" << std::endl;
+		std::cerr << "Usage: ./client <host:port> <op1> <op2>" << std::endl;
 		return 1001;
 	}
+	
+	try
+	{
+		std::string host = argv[1];
+		int op1 = std::stoi(argv[2]);
+		int op2 = std::stoi(argv[3]);
 
-	std::string host = argv[1];
-	int op1 = std::stoi(argv[2]);
-	int op2 = std::stoi(argv[3]);
-
-	auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-	SumClient client(channel);
-	int result = client.ComputeSum(op1, op2);	
-	std::cout << op1 << " + " << op2 << " = " << result << std::endl;
-
+		auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
+		SumClient client(channel);
+		int result = client.ComputeSum(op1, op2);	
+		std::cout << op1 << " + " << op2 << " = " << result << std::endl;
+	}
+	catch(const std::exception& e)
+	{	
+		std::cerr << e.what() << '\n';
+	}
+	
 	return 0;
 }

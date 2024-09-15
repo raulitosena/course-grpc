@@ -3,6 +3,7 @@
 #include <grpcpp/grpcpp.h>
 #include <proto/sum.pb.h>
 #include <proto/sum.grpc.pb.h>
+#include "absl/log/check.h"
 
 
 // Class encompassing the state and logic needed to serve a request.
@@ -19,7 +20,6 @@ public:
 	}
 	~CallData()
 	{
-		//std::cout << "CallData destroyed" <<std::endl;
 	}
 
 	void Proceed() 
@@ -42,16 +42,14 @@ public:
 			new CallData(service_, cq_);
 			// The actual processing.
 			response_.set_result(request_.op1() + request_.op2());
-			std::cout << " - Calculating... (" << request_.op1() << " + " << request_.op2() << ")" << std::endl;
-			std::this_thread::sleep_for(std::chrono::seconds(10));
-			// And we are done! Let the gRPC runtime know we've finished, using the memory
-			// address of this instance as the uniquely identifying tag for the event.
+
+			std::this_thread::sleep_for(std::chrono::seconds(2));
 			status_ = FINISH;
 			stream_.Finish(response_, grpc::Status::OK, this);
 		}
 		else 
 		{
-			//CHECK_EQ(status_, FINISH);
+			CHECK_EQ(status_, FINISH);
 			// Once in the FINISH state, deallocate ourselves (CallData).
 			delete this;
 		}
@@ -75,7 +73,7 @@ private:
 	grpc::ServerAsyncResponseWriter<sum::SumResult> stream_;
 
 	// Let's implement a tiny state machine with the following states.
-	enum CallStatus { CREATE, PROCESS, FINISH };
+	enum CallStatus { CREATE=1001, PROCESS=2001, FINISH=3001 };
 	// The current serving state.
 	CallStatus status_; 
 };
@@ -83,6 +81,10 @@ private:
 class SumServiceImpl : public sum::SumService::Service
 {
 public:
+	SumServiceImpl()
+	{
+	}
+
 	~SumServiceImpl()
 	{
 		this->Stop();		
@@ -91,7 +93,7 @@ public:
 	// There is no shutdown handling in this code.
 	void Start(uint16_t port)
 	{
-		std::string server_address = absl::StrFormat("0.0.0.0:%d", port);
+		std::string server_address = absl::StrFormat("localhost:%d", port);
 
 		grpc::ServerBuilder builder;
 		// Listen on the given address without any authentication mechanism.
@@ -131,26 +133,7 @@ public:
 
 			static_cast<CallData*>(tag)->Proceed();
 		}
-		// while (true) {
-		// // Block waiting to read the next event from the completion queue. The
-		// // event is uniquely identified by its tag, which in this case is the
-		// // memory address of a CallData instance.
-		// // The return value of Next should always be checked. This return value
-		// // tells us whether there is any kind of event or cq_ is shutting down.
-		// CHECK(cq_->Next(&tag, &ok));
-		// CHECK(ok);
-		// static_cast<CallData*>(tag)->Proceed();
 	}
-
-	// grpc::Status ComputeSum(grpc::ServerContext* context, const sum::SumOperand* request, sum::SumResult* response) override
-	// {
-	// 	float result = request->op1() + request->op2();
-	// 	response->set_result(result);
-
-	// 	std::this_thread::sleep_for(std::chrono::seconds(3));
-
-	// 	return grpc::Status::OK;
-	// }
 
 private:
 	std::unique_ptr<grpc::ServerCompletionQueue> cq_;
@@ -158,43 +141,18 @@ private:
 	std::unique_ptr<grpc::Server> server_;
 };
 
-// int main(int argc, char** argv)
-// {
-// 	if (argc != 2)
-// 	{
-// 		std::cerr << "Missing parameters!" << std::endl;
-// 		return 1001;
-// 	}
-
-// 	std::string host = argv[1];
-
-// 	SumServiceImpl service;
-// 	grpc::ServerBuilder builder;
-// 	builder.AddListeningPort(host, grpc::InsecureServerCredentials());
-// 	builder.RegisterService(&service);
-// 	auto cq = builder.AddCompletionQueue();
-// 	auto server(builder.BuildAndStart());
-
-// 	std::cout << "Sum server running on " << host << " ..." << std::endl;
-
-// 	server->Wait();
-
-// 	return 0;
-// }
-
-
-
 int main(int argc, char** argv)
 {
+	if (argc != 2)
+	{
+		std::cerr << "Usage: ./server <port>" << std::endl;
+		return 1001;
+	}
+
+	int port = std::stoi(argv[1]);
 	SumServiceImpl server;
-	std::cout << "Started!" << std::endl;
-
-	server.Start(5000);
-	std::cout << "Running..." << std::endl;
-
-	server.HandleRpcs();
-
+	server.Start(port);
+	
 	std::cout << "Exit!" << std::endl;
-
 	return 0;
 }
