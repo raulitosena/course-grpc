@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(04-evens)
+project(05-sum-async)
 set (SERVER_NAME server)
 set (CLIENT_NAME client)
 
@@ -14,12 +14,12 @@ find_package(gRPC CONFIG REQUIRED)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/..)
 
-file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../proto/*.proto")
-file(GLOB PROTO_SRCS "${CMAKE_CURRENT_LIST_DIR}/../proto/*.cc")
+file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../proto/sum*.proto")
+file(GLOB PROTO_SRCS "${CMAKE_CURRENT_LIST_DIR}/../proto/sum*.cc")
 
 add_custom_target(pre_build_commands
-	COMMAND protoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --cpp_out=${CMAKE_CURRENT_LIST_DIR}/../proto ${CMAKE_CURRENT_LIST_DIR}/../proto/*.proto 
-	COMMAND protoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --grpc_out=${CMAKE_CURRENT_LIST_DIR}/../proto --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ${CMAKE_CURRENT_LIST_DIR}/../proto/*.proto 
+	COMMAND protoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --cpp_out=${CMAKE_CURRENT_LIST_DIR}/../proto ${CMAKE_CURRENT_LIST_DIR}/../proto/sum*.proto 
+	COMMAND protoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --grpc_out=${CMAKE_CURRENT_LIST_DIR}/../proto --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ${CMAKE_CURRENT_LIST_DIR}/../proto/sum*.proto 
 	COMMENT "Generating protocol buffers and gRPC services..."
 )
 
