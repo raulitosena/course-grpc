@@ -12,7 +12,7 @@ public:
 	{
 	}
 
-	int ComputeSum(int op1, int op2)
+	void ComputeSum(int op1, int op2)
 	{
 		grpc::ClientContext context;
 		sum::SumOperand request;
@@ -46,8 +46,10 @@ public:
 		// corresponds solely to the request for updates introduced by Finish().
 		CHECK(ok);
 
+		std::cout << "Response (thread ID): " << std::this_thread::get_id() << std::endl;
+
 		if (status.ok())
-			return response.result();
+			std::cout << "SUM: " << response.result() << std::endl;
 		else
 			throw std::runtime_error("RPC failed: " + status.error_message());
 	}
@@ -72,8 +74,9 @@ int main(int argc, char** argv)
 
 		auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
 		SumClient client(channel);
-		int result = client.ComputeSum(op1, op2);	
-		std::cout << op1 << " + " << op2 << " = " << result << std::endl;
+
+		std::cout << "Request  (thread ID): " << std::this_thread::get_id() << std::endl;
+		client.ComputeSum(op1, op2);	
 	}
 	catch(const std::exception& e)
 	{	
