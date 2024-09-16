@@ -104,9 +104,12 @@ public:
 		// Get hold of the completion queue used for the asynchronous communication
 		// with the gRPC runtime.
 		cq_ = builder.AddCompletionQueue();
-		// Finally assemble the server.
-		server_ = builder.BuildAndStart();
-		std::cout << "Server listening on " << server_address << std::endl;
+		if (server_)
+		{
+			// Finally assemble the server.
+			server_ = builder.BuildAndStart();
+			std::cout << "Server running on " << port << " ..." << std::endl;
+		}
 
 		// Proceed to the server's main loop.
 		HandleRpcs();
@@ -114,9 +117,10 @@ public:
 
 	void Stop()
 	{
-		server_->Shutdown();
-		// Always shutdown the completion queue after the server.
-		cq_->Shutdown();
+		if (server_)
+			server_->Shutdown();
+		if (cq_)
+			cq_->Shutdown();
 	}
 
 	// This can be run in multiple threads if needed.
@@ -143,6 +147,8 @@ private:
 
 int main(int argc, char** argv)
 {
+	std::cout << "..:: 05-sum-async ::.." << std::endl;
+
 	if (argc != 2)
 	{
 		std::cerr << "Usage: ./server <port>" << std::endl;

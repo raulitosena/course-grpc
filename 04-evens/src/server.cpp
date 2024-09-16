@@ -30,21 +30,32 @@ class EvensServiceImpl : public evens::EvensService::Service
 
 int main(int argc, char** argv)
 {
+	std::cout << "..:: 04-evens ::.." << std::endl;
+
 	if (argc != 2)
 	{
 		std::cerr << "Missing parameters!" << std::endl;
 		return 1001;
 	}
 
-	std::string host = argv[1];
-
-	EvensServiceImpl service;
-	grpc::ServerBuilder builder;
-	builder.AddListeningPort(host, grpc::InsecureServerCredentials());
-	builder.RegisterService(&service);
-	std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-	std::cout << "Evens server running on " << host << " ..." << std::endl;
-	server->Wait();
+	try
+	{
+		std::string host = argv[1];
+		EvensServiceImpl service;
+		grpc::ServerBuilder builder;
+		builder.AddListeningPort(host, grpc::InsecureServerCredentials());
+		builder.RegisterService(&service);
+		std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+		if (server)
+		{
+			std::cout << "Server running on " << host << " ..." << std::endl;
+			server->Wait();
+		}
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 
 	return 0;
 }

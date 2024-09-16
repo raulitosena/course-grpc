@@ -49,15 +49,16 @@ int main(int argc, char** argv)
 	{
 		int port = std::stoi(argv[1]);
 		std::string host = absl::StrFormat("localhost:%d", port);
-
 		SumServiceImpl service;
 		grpc::ServerBuilder builder;
 		builder.AddListeningPort(host, grpc::InsecureServerCredentials());
 		builder.RegisterService(&service);
 		std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-		std::cout << "Sum server running on " << host << " ..." << std::endl;
-
-		server->Wait();
+		if (server)
+		{
+			std::cout << "Server running on " << host << " ..." << std::endl;
+			server->Wait();
+		}
 	}
 	catch(const std::exception& e)
 	{

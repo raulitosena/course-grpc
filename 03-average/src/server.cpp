@@ -34,22 +34,32 @@ class AverageServiceImpl : public average::AverageService::Service
 
 int main(int argc, char** argv)
 {
+	std::cout << "..:: 03-average ::.." << std::endl;
+
 	if (argc != 2)
 	{
 		std::cerr << "Missing parameters!" << std::endl;
 		return 1001;
 	}
 
-	std::string host = argv[1];
-	
-	AverageServiceImpl service;
-	grpc::ServerBuilder builder;
-	builder.AddListeningPort(host, grpc::InsecureServerCredentials());
-	builder.RegisterService(&service);
-	auto server(builder.BuildAndStart());
-	std::cout << "Average server running on " << host << " ..." << std::endl;
-	
-	server->Wait();
+	try
+	{
+		std::string host = argv[1];	
+		AverageServiceImpl service;
+		grpc::ServerBuilder builder;
+		builder.AddListeningPort(host, grpc::InsecureServerCredentials());
+		builder.RegisterService(&service);
+		auto server(builder.BuildAndStart());
+		if (server)
+		{
+			std::cout << "Server running on " << host << " ..." << std::endl;
+			server->Wait();
+		}
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 
 	return 0;
 }
