@@ -6,78 +6,73 @@
 #include "fibonacci.hpp"
 
 
+class FibonacciWriterReactor : public grpc::ServerWriteReactor<fibonacci::FibonacciResponse>
+{
+public:
+	FibonacciWriterReactor(const fibonacci::FibonacciRequest* request, const std::vector<fibonacci::FibonacciResponse>* responses)
+		: responses_ptr(responses), current_response(responses_ptr->begin())
+	{
+		this->NextWrite();
+	}
+
+	void OnDone() override
+	{
+		std::cout << "RPC Completed" << std::endl;
+		delete this;
+	}
+
+	void OnCancel() override 
+	{
+		std::cerr << "RPC Cancelled" << std::endl;
+	}
+
+	void OnWriteDone(bool ok) override
+	{
+		if (!ok) 
+		{
+			this->Finish(grpc::Status(grpc::StatusCode::UNKNOWN, "Write failed."));
+		}
+
+		this->NextWrite();
+	}
+	
+private:
+	void NextWrite()
+	{
+		while (this->current_response != this->responses_ptr->end()) 
+		{
+			const fibonacci::FibonacciResponse& f = *this->current_response;
+			this->current_response++;
+			this->StartWrite(&f);
+			return;
+		}
+
+		Finish(grpc::Status::OK);
+	}
+
+	const std::vector<fibonacci::FibonacciResponse>* responses_ptr;
+	std::vector<fibonacci::FibonacciResponse>::const_iterator current_response;
+};
+
 class FibonacciServiceImpl : public fibonacci::FibonacciService::CallbackService
 {
 public:
 	grpc::ServerWriteReactor<fibonacci::FibonacciResponse>* GetFibonacciSequence(grpc::CallbackServerContext* context, const fibonacci::FibonacciRequest* request) override
 	{
-		class FibonacciReactor : public grpc::ServerWriteReactor<fibonacci::FibonacciResponse>
+		this->responses_stream.clear();
+		auto fibonacci = GenerateFibonacci(request->value());
+
+		for (auto &&value : fibonacci)
 		{
-		public:
-			FibonacciReactor(const fibonacci::FibonacciRequest* request, const std::vector<fibonacci::FibonacciResponse>* responses)
-				: responses_(responses), next_response(responses_->begin())
-			{
-				this->fibonacci_sequence_ = GenerateFibonacci(request->value());
-
-				for (auto &&value : fibonacci_sequence_)
-				{
-					fibonacci::FibonacciResponse fibo;
-					fibo.set_value(value);
-					
-					//this->responses->push_back(std::move(fibo));
-					std::vector<fibonacci::FibonacciResponse>* res;
-					res->push_back(std::move(fibo));
-				}
-
-				this->NextWrite();
-			}
-
-			void OnDone() override
-			{
-				std::cout << "RPC Completed" << std::endl;
-				delete this;
-			}
-
-			void OnCancel() override 
-			{
-				std::cerr << "RPC Cancelled" << std::endl;
-			}
-
-			void OnWriteDone(bool ok) override
-			{
-				if (!ok) 
-				{
-					this->Finish(grpc::Status(grpc::StatusCode::UNKNOWN, "Write failed."));
-				}
-
-				this->NextWrite();
-			}
-			
-		private:
-			void NextWrite()
-			{
-				while (this->next_response != this->responses_->end()) 
-				{
-					const fibonacci::FibonacciResponse& f = *this->next_response;
-					this->next_response++;
-					this->StartWrite(&f);
-					return;
-				}
-
-				Finish(grpc::Status::OK);
-			}
-
-			std::vector<uint32_t> fibonacci_sequence_;
-			const std::vector<fibonacci::FibonacciResponse>* responses_;
-			std::vector<fibonacci::FibonacciResponse>::const_iterator next_response;
-		};
-
-
-		return new FibonacciReactor(request, &feature_list_);
+			fibonacci::FibonacciResponse response;
+			response.set_value(value);			
+			this->responses_stream.push_back(response);
+		}
+		return new FibonacciWriterReactor(request, &this->responses_stream);
 	}
 
 private:
-  std::vector<fibonacci::FibonacciResponse> feature_list_;
+	std::vector<fibonacci::FibonacciResponse> responses_stream;
 };
 
 
