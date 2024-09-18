@@ -3,15 +3,15 @@
 #include <proto/fibonacci.pb.h>
 #include <proto/fibonacci.grpc.pb.h>
 #include <vector>
-#include "fibonacci.hpp"
 
 
 class FibonacciWriterReactor : public grpc::ServerWriteReactor<fibonacci::FibonacciResponse>
 {
 public:
-	FibonacciWriterReactor(const fibonacci::FibonacciRequest* request, const std::vector<fibonacci::FibonacciResponse>* responses)
-		: responses_ptr(responses), current_response(responses_ptr->begin())
+	FibonacciWriterReactor(const fibonacci::FibonacciRequest* request)
 	{
+		this->SetResponseStream(request->value());
+		this->current_response = responses_stream.begin();
 		this->NextWrite();
 	}
 
@@ -24,6 +24,7 @@ public:
 	void OnCancel() override 
 	{
 		std::cerr << "RPC Cancelled" << std::endl;
+		delete this;
 	}
 
 	void OnWriteDone(bool ok) override
@@ -39,7 +40,7 @@ public:
 private:
 	void NextWrite()
 	{
-		while (this->current_response != this->responses_ptr->end()) 
+		while (this->current_response != this->responses_stream.end()) 
 		{
 			const fibonacci::FibonacciResponse& f = *this->current_response;
 			this->current_response++;
@@ -50,29 +51,34 @@ private:
 		Finish(grpc::Status::OK);
 	}
 
-	const std::vector<fibonacci::FibonacciResponse>* responses_ptr;
-	std::vector<fibonacci::FibonacciResponse>::const_iterator current_response;
+	void SetResponseStream(unsigned int n)
+	{
+		this->responses_stream.reserve(n);  // Reserve space for `n` responses
+		unsigned int a = 0, b = 1;
+		for (unsigned int i = 0; i < n; ++i)
+		{
+			fibonacci::FibonacciResponse response;
+			response.set_value(a);
+			this->responses_stream.push_back(std::move(response));
+			unsigned int next = a + b;
+			a = b;
+			b = next;
+		}
+	}
+
+private:
+	std::vector<fibonacci::FibonacciResponse> responses_stream;
+	std::vector<fibonacci::FibonacciResponse>::iterator current_response;
 };
+
 
 class FibonacciServiceImpl : public fibonacci::FibonacciService::CallbackService
 {
 public:
 	grpc::ServerWriteReactor<fibonacci::FibonacciResponse>* GetFibonacciSequence(grpc::CallbackServerContext* context, const fibonacci::FibonacciRequest* request) override
 	{
-		this->responses_stream.clear();
-		auto fibonacci = GenerateFibonacci(request->value());
-
-		for (auto &&value : fibonacci)
-		{
-			fibonacci::FibonacciResponse response;
-			response.set_value(value);			
-			this->responses_stream.push_back(response);
-		}
-		return new FibonacciWriterReactor(request, &this->responses_stream);
+		return new FibonacciWriterReactor(request);
 	}
-
-private:
-	std::vector<fibonacci::FibonacciResponse> responses_stream;
 };
 
 
