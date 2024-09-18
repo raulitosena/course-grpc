@@ -40,22 +40,22 @@ public:
 private:
 	void NextWrite()
 	{
-		while (this->current_response != this->responses_stream.end()) 
+		if (this->current_response == this->responses_stream.end())
 		{
-			const fibonacci::FibonacciResponse& f = *this->current_response;
-			this->current_response++;
-			this->StartWrite(&f);
+			Finish(grpc::Status::OK);
 			return;
 		}
 
-		Finish(grpc::Status::OK);
+		const fibonacci::FibonacciResponse& response = *this->current_response;
+		this->current_response++;
+		this->StartWrite(&response);
 	}
 
-	void SetResponseStream(unsigned int n)
+	void SetResponseStream(unsigned int limit)
 	{
-		this->responses_stream.reserve(n);  // Reserve space for `n` responses
+		this->responses_stream.reserve(limit);
 		unsigned int a = 0, b = 1;
-		for (unsigned int i = 0; i < n; ++i)
+		for (unsigned int i = 0; i < limit; i++)
 		{
 			fibonacci::FibonacciResponse response;
 			response.set_value(a);
