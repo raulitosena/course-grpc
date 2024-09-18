@@ -7,10 +7,10 @@
 class FibonacciReaderReactor : public grpc::ClientReadReactor<fibonacci::FibonacciResponse>
 {
 public:
-	FibonacciReaderReactor(fibonacci::FibonacciService::Stub* stub, const fibonacci::FibonacciRequest& rect)
+	FibonacciReaderReactor(fibonacci::FibonacciService::Stub* stub, const fibonacci::FibonacciRequest& request)
 	{
-		stub->async()->GetFibonacciSequence(&context_, &rect, this);
-		StartRead(&response_);
+		stub->async()->GetFibonacciSequence(&this->context, &request, this);
+		StartRead(&this->response);
 		StartCall();
 	}
 
@@ -18,35 +18,35 @@ public:
 	{
 		if (ok)
 		{
-			this->sequence_.push_back(response_.value());
-			StartRead(&response_);
+			this->fibonacci_numbers.push_back(this->response.value());
+			StartRead(&this->response);
 		}
 	}
 
-	void OnDone(const grpc::Status& s) override
+	void OnDone(const grpc::Status& status) override
 	{
-		std::unique_lock<std::mutex> l(mu_);
-		status_ = s;
-		done_ = true;
-		cv_.notify_one();
+		std::unique_lock<std::mutex> lock(this->mtx);
+		this->status = status;
+		this->done = true;
+		this->cv.notify_one();
 	}
 	
 	grpc::Status Await(std::vector<unsigned int>& sequence)
 	{
-		std::unique_lock<std::mutex> l(mu_);
-		cv_.wait(l, [this] { return done_; });
-		sequence = std::move(this->sequence_);
-		return std::move(status_);
+		std::unique_lock<std::mutex> lock(this->mtx);
+		this->cv.wait(lock, [this] { return this->done; });
+		sequence = std::move(this->fibonacci_numbers);
+		return std::move(this->status);
 	}
 
 private:
-	grpc::ClientContext context_;
-	fibonacci::FibonacciResponse response_;
-	std::mutex mu_;
-	std::condition_variable cv_;
-	grpc::Status status_;
-	bool done_ = false;
-	std::vector<unsigned int> sequence_;
+	grpc::ClientContext context;
+	fibonacci::FibonacciResponse response;
+	std::mutex mtx;
+	std::condition_variable cv;
+	grpc::Status status;
+	bool done = false;
+	std::vector<unsigned int> fibonacci_numbers;
 };
 
 class FibonacciClient {
@@ -79,7 +79,6 @@ public:
 private:
 	std::unique_ptr<fibonacci::FibonacciService::Stub> stub;
 };
-
 
 int main(int argc, char** argv)
 {
