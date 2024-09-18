@@ -22,25 +22,18 @@ public:
 		this->stub->async()->ComputeSum(&context, &request, &response, std::bind(&SumClient::ComputeSumDone, this, std::placeholders::_1));
 
 		std::unique_lock<std::mutex> lock(this->mtx);
-		while (!done) 
-		{
-			this->cv.wait(lock);
-		}
+		this->cv.wait(lock, [this] { return this->done; });
 
 		if (this->status.ok()) 
-		{
 			return response.result();
-		} 
 		else 
-		{
 			throw std::runtime_error(this->status.error_message());
-		}
 	}
 
 	void ComputeSumDone(grpc::Status status)
 	{
-		this->status = std::move(status);
 		std::unique_lock<std::mutex> lock(mtx);
+		this->status = std::move(status);
 		this->done = true;
 		this->cv.notify_one();
 	}
