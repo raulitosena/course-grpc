@@ -38,18 +38,26 @@ int main(int argc, char** argv)
 {
 	if (argc != 4)
 	{
-		std::cerr << "Missing parameters!" << std::endl;
+		std::cerr << "Usage: ./client <port> <op1> <op2>" << std::endl;
 		return 1001;
 	}
+	
+	try
+	{
+		int port = std::stoi(argv[1]);
+		int op1 = std::stoi(argv[2]);
+		int op2 = std::stoi(argv[3]);
+		std::string host = absl::StrFormat("localhost:%d", port);
 
-	std::string host = argv[1];
-	int op1 = std::stoi(argv[2]);
-	int op2 = std::stoi(argv[3]);
-
-	auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-	SumClient client(channel);
-	int result = client.ComputeSum(op1, op2);	
-	std::cout << op1 << " + " << op2 << " = " << result << std::endl;
+		auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
+		SumClient client(channel);
+		int result = client.ComputeSum(op1, op2);	
+		std::cout << op1 << " + " << op2 << " = " << result << std::endl;
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 
 	return 0;
 }
