@@ -1,8 +1,8 @@
 
 project(01-sum)
 
-set (SERVER_NAME "server")
-set (CLIENT_NAME "client")
+set (SERVER_NAME "server-01")
+set (CLIENT_NAME "client-01")
 
 set(BUILD_DIR ${GRPC_DIR}/build/${CMAKE_BUILD_TYPE}/${PROJECT_NAME})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_DIR})

@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.28)
-project(grpc-project)
+project(grpc-course)
 
 set(GRPC_DIR ${CMAKE_CURRENT_LIST_DIR})
 
