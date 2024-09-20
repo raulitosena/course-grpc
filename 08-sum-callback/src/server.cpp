@@ -23,7 +23,6 @@ private:
 	void OnCancel() override 
 	{
 		std::cerr << "RPC Cancelled" << std::endl;
-		delete this;
 	}
 };
 

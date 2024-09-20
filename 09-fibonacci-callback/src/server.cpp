@@ -24,7 +24,6 @@ public:
 	void OnCancel() override 
 	{
 		std::cerr << "RPC Cancelled" << std::endl;
-		delete this;
 	}
 
 	void OnWriteDone(bool ok) override
