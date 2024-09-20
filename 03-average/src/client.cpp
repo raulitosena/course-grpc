@@ -47,17 +47,24 @@ int main(int argc, char** argv)
 {
 	if (argc != 2)
 	{
-		std::cerr << "Missing parameters!" << std::endl;
+		std::cerr << "Usage: ./client <port>" << std::endl;
 		return 1001;
 	}
 
-	std::string host = argv[1];
-
-	auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-	AverageClient client(channel);
-	std::vector<int> samples = { 1, 2, 3, 4 };
-	float average = client.ComputeAverage(samples);
-	std::cout << "Average: " << average << std::endl;
+	try
+	{
+		int port = std::stoi(argv[1]);
+		std::string host = absl::StrFormat("localhost:%d", port);
+		auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
+		AverageClient client(channel);
+		std::vector<int> samples = { 1, 2, 3, 4 };
+		float average = client.ComputeAverage(samples);
+		std::cout << "Average: " << average << std::endl;	
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 
 	return 0;
 }

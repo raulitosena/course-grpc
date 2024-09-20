@@ -84,24 +84,31 @@ int main(int argc, char** argv)
 {
 	if (argc != 3)
 	{
-		std::cerr << "Missing parameters! Usage: ./client <port> <limit>" << std::endl;
+		std::cerr << "Usage: ./client <port> <limit>" << std::endl;
 		return 1001;
 	}
 
-	int port = std::stoi(argv[1]);
-	uint32_t limit = std::stoul(argv[2]);
-	std::string host = absl::StrFormat("localhost:%d", port);
-
-	std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-	FibonacciClient client(channel);
-	std::vector<unsigned int> sequence = client.GetFibonacciSequence(limit);
-
-	std::cout << "From Fibonacci server: ";
-	for (auto&& val : sequence)
+	try
 	{
-		std::cout << val << " ";
+		int port = std::stoi(argv[1]);
+		uint32_t limit = std::stoul(argv[2]);
+		std::string host = absl::StrFormat("localhost:%d", port);
+
+		std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
+		FibonacciClient client(channel);
+		std::vector<unsigned int> sequence = client.GetFibonacciSequence(limit);
+
+		std::cout << "From Fibonacci server: ";
+		for (auto&& val : sequence)
+		{
+			std::cout << val << " ";
+		}
+		std::cout << std::endl;
 	}
-	std::cout << std::endl;
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 
 	return 0;
 }

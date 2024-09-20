@@ -4,8 +4,32 @@
 #include <proto/evens.grpc.pb.h>
 
 
-class EvensServiceImpl : public evens::EvensService::Service
+class EvensServiceRpc : public evens::EvensService::Service
 {
+public:
+	EvensServiceRpc(unsigned short port)
+	{
+		this->host = absl::StrFormat("localhost:%d", port);
+	}
+
+	void Run()
+	{
+		grpc::ServerBuilder builder;
+		builder.AddListeningPort(this->host, grpc::InsecureServerCredentials());
+		builder.RegisterService(this);
+		std::shared_ptr<grpc::Server> server = builder.BuildAndStart();
+
+		if (server)
+		{
+			std::cout << "Server running on " << this->host << " ..." << std::endl;
+			server->Wait();
+		}
+		else
+		{
+			throw std::runtime_error("Failed to start server on " + this->host);
+		}
+	}
+
 	grpc::Status FindEvens(grpc::ServerContext* context, grpc::ServerReaderWriter<evens::Number, evens::Number>* stream) override
 	{
 		evens::Number request;
@@ -26,6 +50,9 @@ class EvensServiceImpl : public evens::EvensService::Service
 
 		return grpc::Status::OK;
 	}
+
+private:
+	std::string host;
 };
 
 int main(int argc, char** argv)
@@ -41,21 +68,13 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		std::string host = absl::StrFormat("localhost:%d", port);
-		EvensServiceImpl service;
-		grpc::ServerBuilder builder;
-		builder.AddListeningPort(host, grpc::InsecureServerCredentials());
-		builder.RegisterService(&service);
-		std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-		if (server)
-		{
-			std::cout << "Server running on " << host << " ..." << std::endl;
-			server->Wait();
-		}
-	}
-	catch(const std::exception& e)
+		EvensServiceRpc service(port);
+		service.Run();
+	} 
+	catch (const std::exception& e)
 	{
-		std::cerr << e.what() << '\n';
+		std::cerr << "Error: " << e.what() << std::endl;
+		return 1002;
 	}
 
 	return 0;

@@ -22,7 +22,7 @@ public:
 		this->stub->async()->ComputeSum(&context, &request, &response, std::bind(&SumClient::ComputeSumDone, this, std::placeholders::_1));
 
 		std::unique_lock<std::mutex> lock(this->mtx);
-		while (!done) 
+		while (!this->done) 
 		{
 			this->cv.wait(lock);
 		}
@@ -40,7 +40,7 @@ public:
 	void ComputeSumDone(grpc::Status status)
 	{
 		this->status = std::move(status);
-		std::unique_lock<std::mutex> lock(mtx);
+		std::unique_lock<std::mutex> lock(this->mtx);
 		this->done = true;
 		this->cv.notify_one();
 	}
@@ -55,8 +55,6 @@ private:
 
 int main(int argc, char** argv) 
 {
-	std::cout << "..:: 08-sum-callback-custom ::.." << std::endl;
-
 	if (argc != 4)
 	{
 		std::cerr << "Usage: ./client <port> <op1> <op2>" << std::endl;

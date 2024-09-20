@@ -55,8 +55,6 @@ private:
 
 int main(int argc, char** argv) 
 {
-	std::cout << "..:: 07-sum-callback ::.." << std::endl;
-
 	if (argc != 4)
 	{
 		std::cerr << "Usage: ./client <port> <op1> <op2>" << std::endl;

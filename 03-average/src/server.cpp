@@ -4,8 +4,32 @@
 #include <proto/average.grpc.pb.h>
 
 
-class AverageServiceImpl : public average::AverageService::Service
+class AverageServiceRpc : public average::AverageService::Service
 {
+public:
+	AverageServiceRpc(unsigned short port)
+	{
+		this->host = absl::StrFormat("localhost:%d", port);
+	}
+
+	void Run()
+	{
+		grpc::ServerBuilder builder;
+		builder.AddListeningPort(this->host, grpc::InsecureServerCredentials());
+		builder.RegisterService(this);
+		std::shared_ptr<grpc::Server> server = builder.BuildAndStart();
+
+		if (server)
+		{
+			std::cout << "Server running on " << this->host << " ..." << std::endl;
+			server->Wait();
+		}
+		else
+		{
+			throw std::runtime_error("Failed to start server on " + this->host);
+		}
+	}
+
 	grpc::Status ComputeAvg(grpc::ServerContext* context, grpc::ServerReader<average::AvgSample>* reader, average::AvgTotal* response) override
 	{
 		average::AvgSample sample;
@@ -30,6 +54,9 @@ class AverageServiceImpl : public average::AverageService::Service
 		response->set_value(result);
 		return grpc::Status::OK;
 	}
+
+private:
+	std::string host;
 };
 
 int main(int argc, char** argv)
@@ -41,25 +68,17 @@ int main(int argc, char** argv)
 		std::cerr << "Usage: ./server <port>" << std::endl;
 		return 1001;
 	}
-	
+
 	try
 	{
 		int port = std::stoi(argv[1]);
-		std::string host = absl::StrFormat("localhost:%d", port);
-		AverageServiceImpl service;
-		grpc::ServerBuilder builder;
-		builder.AddListeningPort(host, grpc::InsecureServerCredentials());
-		builder.RegisterService(&service);
-		auto server(builder.BuildAndStart());
-		if (server)
-		{
-			std::cout << "Server running on " << host << " ..." << std::endl;
-			server->Wait();
-		}
-	}
-	catch(const std::exception& e)
+		AverageServiceRpc service(port);
+		service.Run();
+	} 
+	catch (const std::exception& e)
 	{
-		std::cerr << e.what() << '\n';
+		std::cerr << "Error: " << e.what() << std::endl;
+		return 1002;
 	}
 
 	return 0;
