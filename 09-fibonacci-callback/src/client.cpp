@@ -60,9 +60,9 @@ public:
 		fibonacci::FibonacciRequest request;
 		request.set_value(num);
 
-		FibonacciReaderReactor reader(this->stub.get(), request);
+		FibonacciReaderReactor reactor(this->stub.get(), request);
 		std::vector<unsigned int> sequence;
-		grpc::Status status = reader.Await(sequence);
+		grpc::Status status = reactor.Await(sequence);
 
 		if (status.ok()) 
 		{
@@ -70,7 +70,7 @@ public:
 		} 
 		else
 		{
-			std::cerr << "GetFibonacciSequence RPC failed: " << status.error_message() << std::endl;
+			throw std::runtime_error(status.error_message());
 		}
 
 		return sequence;

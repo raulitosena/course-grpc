@@ -67,7 +67,6 @@ int main(int argc, char** argv)
 		int op1 = std::stoi(argv[2]);
 		int op2 = std::stoi(argv[3]);
 		std::string host = absl::StrFormat("localhost:%d", port);
-
 		auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
 		SumClient client(channel);
 		int result = client.ComputeSum(op1, op2);	
