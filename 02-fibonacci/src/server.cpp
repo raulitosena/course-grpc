@@ -33,7 +33,6 @@ std::vector<uint32_t> GenerateFibonacci(uint32_t limit)
 	return sequence;
 }
 
-
 class FibonacciServiceImpl : public fibonacci::FibonacciService::Service
 {
 	grpc::Status GetFibonacciSequence(grpc::ServerContext* context, const fibonacci::FibonacciRequest* request, grpc::ServerWriter<fibonacci::FibonacciResponse>* writer) override
@@ -59,13 +58,14 @@ int main(int argc, char** argv)
 
 	if (argc != 2)
 	{
-		std::cerr << "Missing parameters!" << std::endl;
+		std::cerr << "Usage: ./server <port>" << std::endl;
 		return 1001;
 	}
 
 	try
 	{
-		std::string host = argv[1];	
+		int port = std::stoi(argv[1]);
+		std::string host = absl::StrFormat("localhost:%d", port);
 		FibonacciServiceImpl service;
 		grpc::ServerBuilder builder;
 		builder.AddListeningPort(host, grpc::InsecureServerCredentials());

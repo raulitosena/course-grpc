@@ -85,13 +85,16 @@ public:
 int main(int argc, char** argv)
 {
 	std::cout << "..:: 09-fibonacci-callback ::.." << std::endl;
-	int port = 5000;
-
+	
+	if (argc != 2)
+	{
+		std::cerr << "Usage: ./server <port>" << std::endl;
+		return 1001;
+	}
+	
 	try
 	{
-		if (argc == 2)
-			port = std::stoi(argv[1]);
-	
+		int port = std::stoi(argv[1]);
 		std::string host = absl::StrFormat("localhost:%d", port);
 
 		FibonacciServiceImpl service;
