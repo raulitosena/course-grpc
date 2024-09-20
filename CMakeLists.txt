@@ -2,6 +2,9 @@
 cmake_minimum_required(VERSION 3.28)
 project(grpc-project)
 
+set(GRPC_DIR ${CMAKE_CURRENT_LIST_DIR})
+
+add_subdirectory(00-proto)
 add_subdirectory(01-sum)
 add_subdirectory(02-fibonacci)
 add_subdirectory(03-average)
