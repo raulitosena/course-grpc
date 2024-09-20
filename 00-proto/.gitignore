@@ -1,0 +1,4 @@
+build/
+.vscode/
+proto/*.h
+proto/*.cc
