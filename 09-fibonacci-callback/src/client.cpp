@@ -26,7 +26,7 @@ public:
 	void OnDone(const grpc::Status& status) override
 	{
 		std::unique_lock<std::mutex> lock(this->mtx);
-		this->status = status;
+		this->status = std::move(status);
 		this->done = true;
 		this->cv.notify_one();
 	}
