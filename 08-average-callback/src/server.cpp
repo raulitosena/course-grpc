@@ -78,7 +78,7 @@ public:
 		}
 	}
 
-	grpc::ServerReadReactor<average::AvgSample>* ComputeAvg(grpc::CallbackServerContext* context, average::AvgTotal* response)
+	grpc::ServerReadReactor<average::AvgSample>* ComputeAvg(grpc::CallbackServerContext* context, average::AvgTotal* response) override
 	{
 		return new AverageReadReactor(response);
 	}
