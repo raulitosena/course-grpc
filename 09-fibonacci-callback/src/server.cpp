@@ -11,7 +11,7 @@ public:
 	FibonacciWriterReactor(const fibonacci::FibonacciRequest* request)
 	{
 		this->SetResponseStream(request->value());
-		this->current_response = responses_stream.begin();
+		this->current_response = stream_responses.begin();
 		this->NextWrite();
 	}
 
@@ -39,7 +39,7 @@ public:
 private:
 	void NextWrite()
 	{
-		if (this->current_response == this->responses_stream.end())
+		if (this->current_response == this->stream_responses.end())
 		{
 			Finish(grpc::Status::OK);
 			return;
@@ -52,13 +52,13 @@ private:
 
 	void SetResponseStream(unsigned int limit)
 	{
-		this->responses_stream.reserve(limit);
+		this->stream_responses.reserve(limit);
 		unsigned int a = 0, b = 1;
 		for (unsigned int i = 0; i < limit; i++)
 		{
 			fibonacci::FibonacciResponse response;
 			response.set_value(a);
-			this->responses_stream.push_back(std::move(response));
+			this->stream_responses.push_back(std::move(response));
 			unsigned int next = a + b;
 			a = b;
 			b = next;
@@ -66,7 +66,7 @@ private:
 	}
 
 private:
-	std::vector<fibonacci::FibonacciResponse> responses_stream;
+	std::vector<fibonacci::FibonacciResponse> stream_responses;
 	std::vector<fibonacci::FibonacciResponse>::iterator current_response;
 };
 

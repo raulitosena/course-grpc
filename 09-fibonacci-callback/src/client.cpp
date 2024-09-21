@@ -10,8 +10,8 @@ public:
 	FibonacciReaderReactor(fibonacci::FibonacciService::Stub* stub, const fibonacci::FibonacciRequest& request)
 	{
 		stub->async()->GetFibonacciSequence(&this->context, &request, this);
-		StartRead(&this->response);
-		StartCall();
+		this->StartCall();
+		this->StartRead(&this->response);
 	}
 
 	void OnReadDone(bool ok) override 
@@ -19,7 +19,7 @@ public:
 		if (ok)
 		{
 			this->fibonacci_numbers.push_back(this->response.value());
-			StartRead(&this->response);
+			this->StartRead(&this->response);
 		}
 	}
 
