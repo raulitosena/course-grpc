@@ -7,72 +7,74 @@
 class AverageWriteReactor : public grpc::ClientWriteReactor<average::AvgSample>
 {
 public:
-	AverageWriteReactor(average::AverageService::Stub* stub, const std::vector<int>& samples)
-		: samples_(samples), index_(0) 
+    AverageWriteReactor(average::AverageService::Stub* stub, const std::vector<int>& samples)
+        : stream_samples(samples), current_sample(stream_samples.begin())
 	{
-		stub->async()->ComputeAvg(&this->context_, &this->response_, this);
-	}
+        stub->async()->ComputeAvg(&this->context, &this->response, this);
+        this->StartCall();
+        this->NextWrite();
+    }
 
-	void OnWriteDone(bool ok) override
+    void OnWriteDone(bool ok) override
 	{
-		if (ok && index_ < samples_.size())
+        if (ok)
 		{
-			// Send the next sample if available
-			this->request.set_value(samples_[index_++]);
-			std::cout << "Write " << this->request.value() << std::endl;
-			StartWrite(&this->request);  // Asynchronous write
-		}
+            // Proceed to write the next sample
+            this->NextWrite();
+        }
 		else
 		{
-			// No more samples to send
-			this->StartWritesDone();  // Signal that writes are done
-		}
-	}
+            // Finish writing if not ok (indicating failure or completion)
+            this->StartWritesDone();
+        }
+    }
 
-	void OnDone(const grpc::Status& status) override
+    void OnDone(const grpc::Status& status) override
 	{
-		std::unique_lock<std::mutex> lock(this->mtx_);
-		this->status_ = status;
-		this->done_ = true;
-		this->cv_.notify_one();
-	}
+        std::unique_lock<std::mutex> lock(this->mtx);
+        this->status = status;
+        this->done = true;
+        this->cv.notify_one();
+    }
 
-	grpc::Status Await(average::AvgTotal& response)
+    grpc::Status Await(average::AvgTotal& response)
 	{
-		std::unique_lock<std::mutex> lock(this->mtx_);
-		this->cv_.wait(lock, [this]	{ return this->done_; });
-		response = std::move(this->response_);
-		return std::move(this->status_);
-	}
-
-	void Push()
-	{
-		this->StartCall();
-
-		if (index_ < samples_.size())
-		{
-			this->request.set_value(samples_[index_++]);
-			std::cout << "Write " << this->request.value() << std::endl;
-			StartWrite(&this->request);  // Start the first write
-		}
-		else
-		{
-			StartWritesDone();  // No samples to send, finish early
-		}
-	}
+        std::unique_lock<std::mutex> lock(this->mtx);
+        this->cv.wait(lock, [this] { return this->done; });
+        response = std::move(this->response);
+        return std::move(this->status);
+    }
 
 private:
-	grpc::ClientContext context_;
-	average::AvgSample request;
-	average::AvgTotal response_;
-	std::vector<int> samples_;
-	size_t index_;
-	std::mutex mtx_;
-	std::condition_variable cv_;
-	grpc::Status status_;
-	bool done_ = false;
-};
+    void NextWrite()
+	{
+        if (this->current_sample != this->stream_samples.end())
+		{
+            // Set the value for the current sample
+            this->request.set_value(*this->current_sample);
+            // Write the sample asynchronously
+            this->StartWrite(&this->request);
+            // Move to the next sample
+            ++this->current_sample;
+        }
+		else
+		{
+            // No more samples to write, signal done
+            this->StartWritesDone();
+        }
+    }
 
+private:
+    grpc::ClientContext context;
+    average::AvgTotal response;
+    average::AvgSample request;
+    std::vector<int> stream_samples;
+    std::vector<int>::iterator current_sample;
+    std::mutex mtx;
+    std::condition_variable cv;
+    grpc::Status status;
+    bool done = false;
+};
 
 class AverageClient
 {
@@ -83,11 +85,8 @@ public:
 
 	float ComputeAverage(const std::vector<int>& samples)
 	{
-		AverageWriteReactor reactor(this->stub.get(), samples);
-
 		// Start the sending process
-		reactor.Push();
-
+		AverageWriteReactor reactor(this->stub.get(), samples);
 		// Wait for the response
 		average::AvgTotal response;
 		grpc::Status status = reactor.Await(response);
@@ -106,29 +105,39 @@ private:
 	std::unique_ptr<average::AverageService::Stub> stub;
 };
 
-
 int main(int argc, char** argv)
 {
-	if (argc != 2)
-	{
-		std::cerr << "Usage: ./client <port>" << std::endl;
-		return 1001;
-	}
+    // Ensure at least 1 argument (port) is provided, but no more than 11 (port + 10 numbers)
+    if (argc < 2 || argc > 12)
+    {
+        std::cerr << "Usage: ./client <port> [numbers... (0 to 10)]" << std::endl;
+        return 1001;
+    }
 
-	try
-	{
-		int port = std::stoi(argv[1]);
-		std::string host = absl::StrFormat("localhost:%d", port);
-		auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-		AverageClient client(channel);
-		std::vector<int> samples = { 1, 2, 3, 4 };
-		float average = client.ComputeAverage(samples);
-		std::cout << "Average: " << average << std::endl;	
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-	}
+    try
+    {
+        // Parse the port
+        int port = std::stoi(argv[1]);
+        std::string host = absl::StrFormat("localhost:%d", port);
+        auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
+        AverageClient client(channel);
 
-	return 0;
+        // Parse numbers from command-line arguments (if any) into the samples vector
+        std::vector<int> samples;
+        for (int i = 2; i < argc; ++i)
+        {
+            int sample = std::stoi(argv[i]);
+            samples.push_back(sample);
+        }
+
+        // If no numbers are provided, an empty vector will be passed
+        float average = client.ComputeAverage(samples);
+        std::cout << "Average: " << average << std::endl;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << '\n';
+    }
+
+    return 0;
 }
