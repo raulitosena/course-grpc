@@ -51,7 +51,6 @@ private:
 	float accumulator = 0.0f;
 };
 
-
 class AverageServiceRpc : public average::AverageService::CallbackService
 {
 public:
@@ -87,7 +86,6 @@ public:
 private:
 	std::string host;
 };
-
 
 int main(int argc, char** argv)
 {
