@@ -18,9 +18,6 @@ public:
 		// Invoke the serving logic right away.
 		Proceed();
 	}
-	~CallData()
-	{
-	}
 
 	void Proceed() 
 	{
@@ -43,7 +40,7 @@ public:
 			// The actual processing.
 			this->response.set_result(this->request.op1() + this->request.op2());
 
-			std::this_thread::sleep_for(std::chrono::seconds(2));
+			std::this_thread::sleep_for(std::chrono::seconds(3));
 			this->status = FINISH;
 			this->stream.Finish(this->response, grpc::Status::OK, this);
 		}
@@ -93,16 +90,15 @@ public:
 
 	void Start()
 	{
+		if (this->server)
+			return;
+
 		grpc::ServerBuilder builder;
 		builder.AddListeningPort(this->host, grpc::InsecureServerCredentials());
 		builder.RegisterService(&this->service);
 		this->cq = builder.AddCompletionQueue();
-		if (this->server)
-		{
-			this->server = builder.BuildAndStart();
-			std::cout << "Server running on " << this->host << " ..." << std::endl;
-		}
-
+		this->server = builder.BuildAndStart();
+		std::cout << "Server running on " << this->host << " ..." << std::endl;
 		this->HandleRpcs();
 	}
 
@@ -117,6 +113,9 @@ public:
 	// This can be run in multiple threads if needed.
 	void HandleRpcs()
 	{
+		if (!this->server)
+			return;
+
 		// Spawn a new CallData instance to serve new clients.
 		new CallData(&this->service, this->cq.get());
 		void* tag;  // uniquely identifies a request.

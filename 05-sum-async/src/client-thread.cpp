@@ -76,11 +76,16 @@ void AsyncCompleteRpc()
 		if (call->status.ok())
 			std::cout << "SUM: " << call->reply.result() << std::endl;
 		else
-			std::cout << "RPC failed" << std::endl;
+			std::cout << "RPC failed: " << call->status.error_message() << std::endl;
 
 		// Once we're complete, deallocate the call object.
 		delete call;
 	}
+}
+
+void Shutdown()
+{
+	cq_.Shutdown();  // Shut down the completion queue to stop the loop
 }
 
 private:
@@ -114,12 +119,14 @@ int main(int argc, char** argv)
 		std::cout << "Request  (thread ID): " << std::this_thread::get_id() << std::endl;
 		client.ComputeSum(op1, op2);
 
+		client.Shutdown(); 		
+
 		thread_.join();
 	}
 	catch(const std::exception& e)
 	{	
 		std::cerr << e.what() << '\n';
 	}
-	
+
 	return 0;
 }
