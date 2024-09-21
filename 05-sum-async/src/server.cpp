@@ -138,8 +138,6 @@ private:
 
 int main(int argc, char** argv)
 {
-	std::cout << "..:: 05-sum-async ::.." << std::endl;
-
 	if (argc != 2)
 	{
 		std::cerr << "Usage: ./server <port>" << std::endl;

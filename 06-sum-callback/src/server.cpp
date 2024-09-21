@@ -4,7 +4,27 @@
 #include <proto/sum.grpc.pb.h>
 
 
+class SumReactor : public grpc::ServerUnaryReactor 
+{
+public:
+	SumReactor(const sum::SumOperand& request, sum::SumResult* response) 
+	{
+		response->set_result(request.op1() + request.op2());
+		this->Finish(grpc::Status::OK);
+	}
 
+private:
+	void OnDone() override 
+	{
+		std::cout << "RPC Completed" << std::endl;
+		delete this;
+	}
+
+	void OnCancel() override 
+	{
+		std::cerr << "RPC Cancelled" << std::endl;
+	}
+};
 
 class SumServiceRpc : public sum::SumService::CallbackService
 {
@@ -32,23 +52,21 @@ public:
 		}
 	}
 
-	grpc::ServerUnaryReactor* ComputeSum(grpc::CallbackServerContext* context, const sum::SumOperand* request, sum::SumResult* response) override 
+	grpc::ServerUnaryReactor* ComputeSum(grpc::CallbackServerContext* context, const sum::SumOperand* request, sum::SumResult* response) override
 	{
-		response->set_result(request->op1() + request->op2());
-		grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
-		std::cout << "Result: " << response->result() << std::endl;
-		reactor->Finish(grpc::Status::OK);
-		return reactor;
-	}
+		return new SumReactor(*request, response);
 
+
+
+
+	}
+	
 private:
 	std::string host;
 };
 
 int main(int argc, char** argv)
 {
-	std::cout << "..:: 07-sum-callback ::.." << std::endl;
-	
 	if (argc != 2)
 	{
 		std::cerr << "Usage: ./server <port>" << std::endl;
@@ -66,6 +84,6 @@ int main(int argc, char** argv)
 		std::cerr << "Error: " << e.what() << std::endl;
 		return 1002;
 	}
-
+	
 	return 0;
 }

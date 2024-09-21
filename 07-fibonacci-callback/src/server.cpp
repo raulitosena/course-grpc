@@ -108,8 +108,6 @@ private:
 
 int main(int argc, char** argv)
 {
-	std::cout << "..:: 09-fibonacci-callback ::.." << std::endl;
-	
 	if (argc != 2)
 	{
 		std::cerr << "Usage: ./server <port>" << std::endl;

@@ -61,8 +61,6 @@ private:
 
 int main(int argc, char** argv)
 {
-	std::cout << "..:: 03-average ::.." << std::endl;
-
 	if (argc != 2)
 	{
 		std::cerr << "Usage: ./server <port>" << std::endl;
