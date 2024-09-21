@@ -22,10 +22,7 @@ public:
 		this->stub->async()->ComputeSum(&context, &request, &response, std::bind(&SumClient::ComputeSumDone, this, std::placeholders::_1));
 
 		std::unique_lock<std::mutex> lock(this->mtx);
-		while (!this->done) 
-		{
-			this->cv.wait(lock);
-		}
+		this->cv.wait(lock, [this] { return this->done; });
 
 		if (this->status.ok()) 
 			return response.result();
