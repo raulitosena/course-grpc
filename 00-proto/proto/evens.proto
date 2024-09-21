@@ -4,10 +4,10 @@ package evens;
 
 message Number
 {
-    int32 value = 1;
+	int32 value = 1;
 }
 
 service EvensService
 {
-    rpc FindEvens(stream Number) returns (stream Number) {}
+	rpc FindEvens(stream Number) returns (stream Number) {}
 }

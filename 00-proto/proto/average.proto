@@ -4,15 +4,15 @@ package average;
 
 message AvgSample
 {
-    int32 value = 1;
+	int32 value = 1;
 }
 
 message AvgTotal
 {
-    float value = 1;
+	float value = 1;
 }
 
 service AverageService
 {
-    rpc ComputeAvg(stream AvgSample) returns (AvgTotal) {}
+	rpc ComputeAvg(stream AvgSample) returns (AvgTotal) {}
 }
