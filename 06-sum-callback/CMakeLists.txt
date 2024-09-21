@@ -30,6 +30,6 @@ target_link_libraries(${SERVER_NAME_DEFAULT} coursegrpc)
 target_link_libraries(${SERVER_NAME} coursegrpc)
 target_link_libraries(${CLIENT_NAME} coursegrpc)
 
-set_property(TARGET ${SERVER_NAME_DEFAULTs} PROPERTY FOLDER ${PROJECT_NAME})
+set_property(TARGET ${SERVER_NAME_DEFAULT} PROPERTY FOLDER ${PROJECT_NAME})
 set_property(TARGET ${SERVER_NAME} PROPERTY FOLDER ${PROJECT_NAME})
 set_property(TARGET ${CLIENT_NAME} PROPERTY FOLDER ${PROJECT_NAME})
