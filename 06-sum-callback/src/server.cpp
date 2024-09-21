@@ -55,10 +55,6 @@ public:
 	grpc::ServerUnaryReactor* ComputeSum(grpc::CallbackServerContext* context, const sum::SumOperand* request, sum::SumResult* response) override
 	{
 		return new SumReactor(*request, response);
-
-
-
-
 	}
 	
 private:
