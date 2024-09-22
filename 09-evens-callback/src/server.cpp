@@ -5,6 +5,13 @@
 #include <queue>
 
 
+// Note: Because these methods are not invoked concurrently for the same reactor instance,
+// the operations on the buffer happen in a serialized manner for a given RPC. Therefore, 
+// explicit synchronization like using std::mutex or std::lock_guard is not required.
+// In other words, In this case, you don’t need to synchronize access to the buffer, as gRPC
+// ensures that the callbacks for the same RPC reactor (e.g., OnReadDone(), OnWriteDone(), etc.) 
+// are executed one at a time.
+
 class EvensServerBidiReactor : public grpc::ServerBidiReactor<evens::Number, evens::Number>
 {
 public:
