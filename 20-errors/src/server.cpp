@@ -1,6 +1,5 @@
 #include <iostream>
 #include <grpcpp/grpcpp.h>
-#include <proto/sqrt.pb.h>
 #include <proto/sqrt.grpc.pb.h>
 #include <cmath>
 
@@ -26,7 +25,6 @@ public:
 private:
 	void OnDone() override 
 	{
-		std::cout << "RPC Completed" << std::endl;
 		delete this;
 	}
 
@@ -70,7 +68,6 @@ public:
 private:
 	std::string host;
 };
-
 
 int main(int argc, char** argv)
 {

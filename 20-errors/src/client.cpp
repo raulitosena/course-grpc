@@ -1,65 +1,8 @@
-#include <grpcpp/grpcpp.h>
-#include <proto/sqrt.pb.h>
-#include <proto/sqrt.grpc.pb.h>
 #include <iostream>
-#include <mutex>
-#include <condition_variable>
-#include <stdexcept>
+#include <grpcpp/grpcpp.h>
+#include "sqrt-callback.hpp"
+#include "sqrt-reactor.hpp"
 
-
-class SqrtClient {
-public:
-	explicit SqrtClient(std::shared_ptr<grpc::Channel> channel) : stub(::squareroot::SqrtService::NewStub(channel)) 
-	{		
-	}
-
-	double Calculate(int number) 
-	{
-	 	grpc::ClientContext context;
-	 	::squareroot::SqrtRequest request;
-	 	::squareroot::SqrtResponse response;
-
-		request.set_number(number);
-	 	this->stub->async()->Calculate(&context, &request, &response, std::bind(&SqrtClient::CalculateDone, this, std::placeholders::_1));
-
-		std::unique_lock<std::mutex> lock(this->mtx);
-		this->cv.wait(lock, [this] { return this->done; });
-
-		if (!this->status.ok())
-		{
-			std::cerr << " - Status.code: " << this->status.error_code() << std::endl;
-			std::cerr << " - Status.message: " << this->status.error_message() << std::endl;
-			std::cerr << " - Status.details: " << this->status.error_details() << std::endl;
-			throw std::runtime_error(this->status.error_message());
-		}
-
- 		return response.result();
-	}
-
-
-    // grpc::Status Await(double& result)
-	// {
-    //     std::unique_lock<std::mutex> lock(this->mtx);
-    //     this->cv.wait(lock, [this] { return this->done; });
-    //     response = std::move(this->response);
-    //     return std::move(this->status);
-    // }
-
-	void CalculateDone(grpc::Status status)
-	{
-		std::unique_lock<std::mutex> lock(mtx);
-		this->status = std::move(status);
-		this->done = true;
-		this->cv.notify_one();
-	}
-
-private:
-	std::unique_ptr<::squareroot::SqrtService::Stub> stub;
-	std::mutex mtx;
-	std::condition_variable cv;
-	bool done = false;
-	grpc::Status status;
-};
 
 int main(int argc, char** argv) 
 {
@@ -69,19 +12,42 @@ int main(int argc, char** argv)
 		return 1001;
 	}
 
+	int port, number;
+	std::shared_ptr<grpc::Channel> channel;
+
 	try
 	{
-		int port = std::stoi(argv[1]);
-		int number = std::stoi(argv[2]);
+		port = std::stoi(argv[1]);
+		number = std::stoi(argv[2]);
 		std::string host = absl::StrFormat("localhost:%d", port);
-		auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-		SqrtClient client(channel);
-		double result = client.Calculate(number);	
-		std::cout << "Sqrt: " << result << std::endl;
+		channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << "Exception: " << e.what() << '\n';
+		std::cerr << e.what() << '\n';
+		return 1002;
+	}
+
+	try
+	{
+		SqrtClientWithReactor client1(channel);
+		double result = client1.Calculate(number);	
+		std::cout << "By reactor  - Sqrt: " << result << std::endl;
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << "By reactor  - Exception: " << e.what() << '\n';
+	}
+
+	try
+	{
+		SqrtClientWithCallback client2(channel);
+		double result = client2.Calculate(number);	
+		std::cout << "By callback - Sqrt: " << result << std::endl;
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << "By callback - Exception: " << e.what() << '\n';
 	}
 
 	return 0;
