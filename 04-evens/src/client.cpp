@@ -52,23 +52,30 @@ int main(int argc, char** argv)
 {
 	if (argc != 2)
 	{
-		std::cerr << "Missing parameters!" << std::endl;
+		std::cerr << "Usage: ./client <port>" << std::endl;
 		return 1001;
 	}
 
-	std::string host = argv[1];
-
-	std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-	EvensClient client(channel);
-	std::vector<int> numbers = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	std::vector<int> evens = client.GetEvens(numbers);
-	std::cout << "Evens: ";
-	for (auto &&val : evens)
+	try
 	{
-		std::cout << val << " " << std::flush;
-	}
+		int port = std::stoi(argv[1]);
+		std::string host = absl::StrFormat("localhost:%d", port);
+		std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
+		EvensClient client(channel);
+		std::vector<int> numbers = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		std::vector<int> evens = client.GetEvens(numbers);
+		std::cout << "Evens: ";
+		for (auto &&val : evens)
+		{
+			std::cout << val << " " << std::flush;
+		}
 
-	std::cout << std::endl;
+		std::cout << std::endl;
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 
 	return 0;
 }

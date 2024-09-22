@@ -1,46 +1,36 @@
-cmake_minimum_required(VERSION 3.28)
-project(05-sum-async)
-set (SERVER_NAME server)
-set (CLIENT_NAME client)
 
-set(BUILD_DIR ${CMAKE_CURRENT_LIST_DIR}/build/${CMAKE_BUILD_TYPE})
+project(05-sum-async)
+
+set (SERVER_NAME "server-05")
+set (CLIENT_NAME "client-05")
+set (CLIENT_NAME2 "client-thread-05")
+
+set(BUILD_DIR ${GRPC_DIR}/build/${CMAKE_BUILD_TYPE}/${PROJECT_NAME})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BUILD_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Protobuf CONFIG REQUIRED)
-find_package(gRPC CONFIG REQUIRED)
-
-include_directories(${CMAKE_CURRENT_LIST_DIR}/..)
-
-file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/../proto/sum*.proto")
-file(GLOB PROTO_SRCS "${CMAKE_CURRENT_LIST_DIR}/../proto/sum*.cc")
-
-add_custom_target(pre_build_commands
-	COMMAND protoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --cpp_out=${CMAKE_CURRENT_LIST_DIR}/../proto ${CMAKE_CURRENT_LIST_DIR}/../proto/sum*.proto 
-	COMMAND protoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --grpc_out=${CMAKE_CURRENT_LIST_DIR}/../proto --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ${CMAKE_CURRENT_LIST_DIR}/../proto/sum*.proto 
-	COMMENT "Generating protocol buffers and gRPC services..."
-)
-
 add_executable(${SERVER_NAME}
-	${PROTO_SRCS}
 	src/server.cpp
 )
 
 add_executable(${CLIENT_NAME}
-	${PROTO_SRCS}
 	src/client.cpp
 )
 
-# protolib created from generated C++ protobuf code
-add_library(protolib ${PROTO_FILES})
-target_link_libraries(protolib gRPC::grpc++)
+add_executable(${CLIENT_NAME2}
+	src/client-thread.cpp
+)
 
-# serversum dependency - protoc compilation & gRPC library
-add_dependencies(${SERVER_NAME} pre_build_commands)
-target_link_libraries(${SERVER_NAME} gRPC::grpc++)
+target_include_directories(${SERVER_NAME} PRIVATE ${GRPC_DIR}/00-proto)
+target_include_directories(${CLIENT_NAME} PRIVATE ${GRPC_DIR}/00-proto)
+target_include_directories(${CLIENT_NAME2} PRIVATE ${GRPC_DIR}/00-proto)
 
-# clientsum dependency - protoc compilation
-add_dependencies(${CLIENT_NAME} pre_build_commands)
-target_link_libraries(${CLIENT_NAME} gRPC::grpc++)
+target_link_libraries(${SERVER_NAME} coursegrpc)
+target_link_libraries(${CLIENT_NAME} coursegrpc)
+target_link_libraries(${CLIENT_NAME2} coursegrpc)
+
+set_property(TARGET ${SERVER_NAME} PROPERTY FOLDER ${PROJECT_NAME})
+set_property(TARGET ${CLIENT_NAME} PROPERTY FOLDER ${PROJECT_NAME})
+set_property(TARGET ${CLIENT_NAME2} PROPERTY FOLDER ${PROJECT_NAME})

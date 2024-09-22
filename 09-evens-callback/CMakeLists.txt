@@ -1,8 +1,8 @@
 
-project(02-fibonacci)
+project(09-evens-callback)
 
-set (SERVER_NAME "server-02")
-set (CLIENT_NAME "client-02")
+set (SERVER_NAME "server-09")
+set (CLIENT_NAME "client-09")
 
 set(BUILD_DIR ${GRPC_DIR}/build/${CMAKE_BUILD_TYPE}/${PROJECT_NAME})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_DIR})

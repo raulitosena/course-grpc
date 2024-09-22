@@ -42,22 +42,39 @@ private:
 	std::unique_ptr<average::AverageService::Stub> stub;
 };
 
-
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-	if (argc != 2)
+	// Ensure at least 1 argument (port) is provided, but no more than 11 (port + 10 numbers)
+	if (argc < 2 || argc > 12)
 	{
-		std::cerr << "Missing parameters!" << std::endl;
+		std::cerr << "Usage: ./client <port> [numbers... (0 to 10)]" << std::endl;
 		return 1001;
 	}
 
-	std::string host = argv[1];
+	try
+	{
+		// Parse the port
+		int port = std::stoi(argv[1]);
+		std::string host = absl::StrFormat("localhost:%d", port);
+		auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
+		AverageClient client(channel);
 
-	auto channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-	AverageClient client(channel);
-	std::vector<int> samples = { 1, 2, 3, 4 };
-	float average = client.ComputeAverage(samples);
-	std::cout << "Average: " << average << std::endl;
+		// Parse numbers from command-line arguments (if any) into the samples vector
+		std::vector<int> samples;
+		for (int i = 2; i < argc; ++i)
+		{
+			int sample = std::stoi(argv[i]);
+			samples.push_back(sample);
+		}
+
+		// If no numbers are provided, an empty vector will be passed
+		float average = client.ComputeAverage(samples);
+		std::cout << "Average: " << average << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "Error: " << e.what() << '\n';
+	}
 
 	return 0;
 }

@@ -1,13 +1,35 @@
 #include <iostream>
 #include <grpcpp/grpcpp.h>
-#include <proto/evens.pb.h>
-#include <proto/evens.grpc.pb.h>
+#include <proto/sum.pb.h>
+#include <proto/sum.grpc.pb.h>
 
 
-class EvensServiceRpc : public evens::EvensService::Service
+class SumReactor : public grpc::ServerUnaryReactor 
 {
 public:
-	EvensServiceRpc(unsigned short port)
+	SumReactor(const sum::SumOperand& request, sum::SumResult* response) 
+	{
+		response->set_result(request.op1() + request.op2());
+		this->Finish(grpc::Status::OK);
+	}
+
+private:
+	void OnDone() override 
+	{
+		std::cout << "RPC Completed" << std::endl;
+		delete this;
+	}
+
+	void OnCancel() override 
+	{
+		std::cerr << "RPC Cancelled" << std::endl;
+	}
+};
+
+class SumServiceRpc : public sum::SumService::CallbackService
+{
+public:
+	SumServiceRpc(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
@@ -30,27 +52,11 @@ public:
 		}
 	}
 
-	grpc::Status FindEvens(grpc::ServerContext* context, grpc::ServerReaderWriter<evens::Number, evens::Number>* stream) override
+	grpc::ServerUnaryReactor* ComputeSum(grpc::CallbackServerContext* context, const sum::SumOperand* request, sum::SumResult* response) override
 	{
-		evens::Number request;
-		evens::Number response;
-		
-		while (stream->Read(&request)) 
-		{
-			std::cout << request.value() << " " << std::flush;
-
-			if (request.value() % 2 == 0)
-			{
-				response.set_value(request.value());
-				stream->Write(response);
-			}
-    	}
-
-		std::cout << std::endl;
-
-		return grpc::Status::OK;
+		return new SumReactor(*request, response);
 	}
-
+	
 private:
 	std::string host;
 };
@@ -66,7 +72,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		EvensServiceRpc service(port);
+		SumServiceRpc service(port);
 		service.Run();
 	} 
 	catch (const std::exception& e)
@@ -74,6 +80,6 @@ int main(int argc, char** argv)
 		std::cerr << "Error: " << e.what() << std::endl;
 		return 1002;
 	}
-
+	
 	return 0;
 }
