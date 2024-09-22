@@ -10,9 +10,16 @@ add_subdirectory(01-sum)
 add_subdirectory(02-fibonacci)
 add_subdirectory(03-average)
 add_subdirectory(04-evens)
-# Asynchronous samples
+
+# Asynchronous samples (single-thread)
 add_subdirectory(05-sum-async)
 add_subdirectory(06-sum-callback)
 add_subdirectory(07-fibonacci-callback)
 add_subdirectory(08-average-callback)
 add_subdirectory(09-evens-callback)
+
+# Asynchronous samples (multithread)
+# To be done
+
+# gRPC features
+add_subdirectory(20-errors)
