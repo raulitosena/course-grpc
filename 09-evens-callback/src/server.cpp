@@ -2,27 +2,27 @@
 #include <grpcpp/grpcpp.h>
 #include <proto/evens.grpc.pb.h>
 #include <proto/evens.pb.h>
-#include <thread>
 #include <queue>
-#include <mutex>
-#include <condition_variable>
 
 
 class EvensServerBidiReactor : public grpc::ServerBidiReactor<evens::Number, evens::Number>
 {
 public:
+	EvensServerBidiReactor()
+	{
+		this->NextCicle();
+	}
+	
 	void OnReadDone(bool ok) override
 	{
 		if (ok)
 		{
-			// Enqueue the received number
-			std::unique_lock<std::mutex> lock(mtx);
 			if (this->incoming.value() % 2 == 0)
 			{
 				this->buffer.push(this->incoming);
 			}
-			// Request next number
-			this->StartRead(&this->incoming);
+
+			this->NextCicle();
 		}
 		else
 		{
@@ -32,17 +32,14 @@ public:
 
 	void OnWriteDone(bool ok) override
 	{
-		if (ok && !this->buffer.empty())
+		if (ok)
 		{
-			std::unique_lock<std::mutex> lock(mtx);
-			this->outgoing = this->buffer.front();
 			this->buffer.pop();
-			this->StartWrite(&this->outgoing);
+			this->NextCicle();
 		}
-		else if (this->buffer.empty())
+		else
 		{
-			// Finished writing evens
-			Finish(grpc::Status::OK);
+			Finish(grpc::Status::CANCELLED);
 		}
 	}
 
@@ -51,16 +48,27 @@ public:
 		delete this;
 	}
 
-	void StartProcessing()
+	void OnCancel() override
 	{
-		this->StartRead(&this->incoming);
+		std::cout << "RPC cancelled!" << std::endl;
+	}
+
+private:
+	void NextCicle()
+	{
+		if (!this->buffer.empty())
+		{
+			this->StartWrite(&this->buffer.front());
+		}
+		else
+		{
+			this->StartRead(&this->incoming);
+		}
 	}
 
 private:
 	evens::Number incoming;
-	evens::Number outgoing;
 	std::queue<evens::Number> buffer;
-	std::mutex mtx;
 };
 
 class EvensServiceRpc : public evens::EvensService::CallbackService
@@ -73,26 +81,20 @@ public:
 
 	grpc::ServerBidiReactor<evens::Number, evens::Number>* FindEvens(grpc::CallbackServerContext* context) override
 	{
-		EvensServerBidiReactor* reactor = new EvensServerBidiReactor();
-		reactor->StartProcessing();
-		return reactor;
+		return new EvensServerBidiReactor();
 	}
 
-	void Start() 
+	void Run() 
 	{
 		grpc::ServerBuilder builder;
 		builder.AddListeningPort(this->host, grpc::InsecureServerCredentials());
 		builder.RegisterService(this);
 		this->server = builder.BuildAndStart();
 		if (this->server)
+		{
 			std::cout << "Server listening on " << this->host << std::endl;
-	}
-
-	void Stop()
-	{
-		if (not this->server)
-			return;
-		this->server->Shutdown();
+			server->Wait();
+		}
 	}
 
 private:
@@ -103,22 +105,17 @@ private:
 
 int main(int argc, char** argv)
 {
-	// if (argc != 2)
-	// {
-	// 	std::cerr << "Usage: ./server <port>" << std::endl;
-	// 	return 1001;
-	// }
+	if (argc != 2)
+	{
+		std::cerr << "Usage: ./server <port>" << std::endl;
+		return 1001;
+	}
 
 	try
 	{
-		//int port = std::stoi(argv[1]);
-		int port = 5000;
+		int port = std::stoi(argv[1]);
 		EvensServiceRpc service(port);
-		service.Start();
-
-		std::this_thread::sleep_for(std::chrono::seconds(600));
-
-		service.Stop();
+		service.Run();
 	}
 	catch (const std::exception& e)
 	{
@@ -128,7 +125,3 @@ int main(int argc, char** argv)
 
 	return 0;
 }
-
-
-
-
