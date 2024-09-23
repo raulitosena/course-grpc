@@ -29,7 +29,8 @@ struct AsyncClientCall
 
 class SumClient {
 public:
-	explicit SumClient(std::shared_ptr<grpc::Channel> channel) : stub_(sum::SumService::NewStub(channel))
+	explicit SumClient(std::shared_ptr<grpc::Channel> channel)
+		: stub_(sum::SumService::NewStub(channel))
 	{
 	}
 

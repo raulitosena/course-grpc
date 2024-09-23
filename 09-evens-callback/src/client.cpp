@@ -9,7 +9,8 @@ class EvensClientBidiReactor : public grpc::ClientBidiReactor<evens::Number, eve
 {
 public:
 	// Constructor: takes a stub and a list of numbers to send
-	EvensClientBidiReactor(evens::EvensService::Stub* stub, const std::vector<int>& numbers) : numbers_to_send(numbers), current_number(numbers_to_send.begin())
+	EvensClientBidiReactor(evens::EvensService::Stub* stub, const std::vector<int>& numbers)
+		: numbers_to_send(numbers), current_number(numbers_to_send.begin()), done(false)
 	{
 		stub->async()->FindEvens(&this->context, this);
 		this->StartCall();
@@ -91,7 +92,7 @@ private:
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
-	bool done = false;
+	bool done;
 };
 
 

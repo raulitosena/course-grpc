@@ -5,7 +5,8 @@
 
 class AverageClient {
 public:
-	explicit AverageClient(std::shared_ptr<grpc::Channel> channel) : stub(average::AverageService::NewStub(channel)) 
+	explicit AverageClient(std::shared_ptr<grpc::Channel> channel)
+		: stub(average::AverageService::NewStub(channel)) 
 	{		
 	}
 

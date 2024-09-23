@@ -5,7 +5,8 @@
 
 class FibonacciClient {
 public:
-	explicit FibonacciClient(std::shared_ptr<grpc::Channel> channel) : stub(fibonacci::FibonacciService::NewStub(channel))
+	explicit FibonacciClient(std::shared_ptr<grpc::Channel> channel)
+		: stub(fibonacci::FibonacciService::NewStub(channel))
 	{		
 	}
 

@@ -8,6 +8,7 @@ class SqrtReactor : public grpc::ClientUnaryReactor
 {
 public:
 	SqrtReactor(::squareroot::SqrtService::Stub* stub, const int& number)
+		: done(false)
 	{
 		this->request.set_number(number);
 		stub->async()->Calculate(&this->context, &this->request, &this->response, this);
@@ -37,7 +38,7 @@ private:
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
-	bool done = false;
+	bool done;
 };
 
 class SqrtClientWithReactor

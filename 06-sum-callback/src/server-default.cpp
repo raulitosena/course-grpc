@@ -4,8 +4,6 @@
 #include <proto/sum.grpc.pb.h>
 
 
-
-
 class SumServiceRpc : public sum::SumService::CallbackService
 {
 public:

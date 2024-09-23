@@ -5,7 +5,8 @@
 
 class EvensClient {
 public:
-	explicit EvensClient(std::shared_ptr<grpc::Channel> channel) : stub(evens::EvensService::NewStub(channel)) 
+	explicit EvensClient(std::shared_ptr<grpc::Channel> channel)
+		: stub(evens::EvensService::NewStub(channel)) 
 	{		
 	}
 

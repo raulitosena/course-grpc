@@ -8,7 +8,8 @@
 
 class SumClient {
 public:
-	explicit SumClient(std::shared_ptr<grpc::Channel> channel) : stub(sum::SumService::NewStub(channel)) 
+	explicit SumClient(std::shared_ptr<grpc::Channel> channel)
+		: stub(sum::SumService::NewStub(channel)) 
 	{		
 	}
 
@@ -17,6 +18,7 @@ public:
 		grpc::ClientContext context;
 		sum::SumOperand request;
 		sum::SumResult response;
+		this->done = false;
 		request.set_op1(op1);
 		request.set_op2(op2);
 		this->stub->async()->ComputeSum(&context, &request, &response, std::bind(&SumClient::ComputeSumDone, this, std::placeholders::_1));
@@ -42,7 +44,7 @@ private:
 	std::unique_ptr<sum::SumService::Stub> stub;
 	std::mutex mtx;
 	std::condition_variable cv;
-	bool done = false;
+	bool done;
 	grpc::Status status;
 };
 

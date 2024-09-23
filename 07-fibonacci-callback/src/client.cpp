@@ -9,6 +9,7 @@ class FibonacciReaderReactor : public grpc::ClientReadReactor<fibonacci::Fibonac
 {
 public:
 	FibonacciReaderReactor(fibonacci::FibonacciService::Stub* stub, const fibonacci::FibonacciRequest& request)
+		: done(false)
 	{
 		stub->async()->GetFibonacciSequence(&this->context, &request, this);
 		this->StartCall();

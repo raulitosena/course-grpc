@@ -8,73 +8,73 @@
 class AverageWriteReactor : public grpc::ClientWriteReactor<average::AvgSample>
 {
 public:
-    AverageWriteReactor(average::AverageService::Stub* stub, const std::vector<int>& samples)
-        : stream_samples(samples), current_sample(stream_samples.begin())
+	AverageWriteReactor(average::AverageService::Stub* stub, const std::vector<int>& samples)
+		: stream_samples(samples), current_sample(stream_samples.begin()), done(false)
 	{
-        stub->async()->ComputeAvg(&this->context, &this->response, this);
-        this->StartCall();
-        this->NextWrite();
-    }
+		stub->async()->ComputeAvg(&this->context, &this->response, this);
+		this->StartCall();
+		this->NextWrite();
+	}
 
-    void OnWriteDone(bool ok) override
+	void OnWriteDone(bool ok) override
 	{
-        if (ok)
+		if (ok)
 		{
-            // Proceed to write the next sample
-            this->NextWrite();
-        }
+			// Proceed to write the next sample
+			this->NextWrite();
+		}
 		else
 		{
-            // Finish writing if not ok (indicating failure or completion)
-            this->StartWritesDone();
-        }
-    }
+			// Finish writing if not ok (indicating failure or completion)
+			this->StartWritesDone();
+		}
+	}
 
-    void OnDone(const grpc::Status& status) override
+	void OnDone(const grpc::Status& status) override
 	{
-        std::unique_lock<std::mutex> lock(this->mtx);
-        this->status = status;
-        this->done = true;
-        this->cv.notify_one();
-    }
+		std::unique_lock<std::mutex> lock(this->mtx);
+		this->status = status;
+		this->done = true;
+		this->cv.notify_one();
+	}
 
-    grpc::Status Await(average::AvgTotal& response)
+	grpc::Status Await(average::AvgTotal& response)
 	{
-        std::unique_lock<std::mutex> lock(this->mtx);
-        this->cv.wait(lock, [this] { return this->done; });
-        response = std::move(this->response);
-        return std::move(this->status);
-    }
+		std::unique_lock<std::mutex> lock(this->mtx);
+		this->cv.wait(lock, [this] { return this->done; });
+		response = std::move(this->response);
+		return std::move(this->status);
+	}
 
 private:
-    void NextWrite()
+	void NextWrite()
 	{
-        if (this->current_sample != this->stream_samples.end())
+		if (this->current_sample != this->stream_samples.end())
 		{
-            // Set the value for the current sample
-            this->request.set_value(*this->current_sample);
-            // Write the sample asynchronously
-            this->StartWrite(&this->request);
-            // Move to the next sample
-            ++this->current_sample;
-        }
+			// Set the value for the current sample
+			this->request.set_value(*this->current_sample);
+			// Write the sample asynchronously
+			this->StartWrite(&this->request);
+			// Move to the next sample
+			++this->current_sample;
+		}
 		else
 		{
-            // No more samples to write, signal done
-            this->StartWritesDone();
-        }
-    }
+			// No more samples to write, signal done
+			this->StartWritesDone();
+		}
+	}
 
 private:
-    grpc::ClientContext context;
-    average::AvgTotal response;
-    average::AvgSample request;
-    std::vector<int> stream_samples;
-    std::vector<int>::iterator current_sample;
-    std::mutex mtx;
-    std::condition_variable cv;
-    grpc::Status status;
-    bool done = false;
+	grpc::ClientContext context;
+	average::AvgTotal response;
+	average::AvgSample request;
+	std::vector<int> stream_samples;
+	std::vector<int>::iterator current_sample;
+	std::mutex mtx;
+	std::condition_variable cv;
+	grpc::Status status;
+	bool done;
 };
 
 class AverageClient
