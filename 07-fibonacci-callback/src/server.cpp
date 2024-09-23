@@ -10,7 +10,7 @@ class FibonacciWriterReactor : public grpc::ServerWriteReactor<fibonacci::Fibona
 public:
 	FibonacciWriterReactor(const fibonacci::FibonacciRequest* request)
 	{
-		this->SetResponseStream(request->value());
+		this->SetResponseStream(request->number());
 		this->current_response = stream_responses.begin();
 		this->NextWrite();
 	}
@@ -57,7 +57,7 @@ private:
 		for (unsigned int i = 0; i < limit; i++)
 		{
 			fibonacci::FibonacciResponse response;
-			response.set_value(a);
+			response.set_number(a);
 			this->stream_responses.push_back(std::move(response));
 			unsigned int next = a + b;
 			a = b;
@@ -96,7 +96,7 @@ public:
 		}
 	}
 
-	grpc::ServerWriteReactor<fibonacci::FibonacciResponse>* GetFibonacciSequence(grpc::CallbackServerContext* context, const fibonacci::FibonacciRequest* request) override
+	grpc::ServerWriteReactor<fibonacci::FibonacciResponse>* GetFibonaccisStream(grpc::CallbackServerContext* context, const fibonacci::FibonacciRequest* request) override
 	{
 		return new FibonacciWriterReactor(request);
 	}
