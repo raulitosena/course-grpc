@@ -33,7 +33,6 @@ int main(int argc, char** argv)
 
 	for (int i = 2; i < argc; ++i)
 	{
-		int number;
 		try
 		{
 			number = std::stoi(argv[i]);
