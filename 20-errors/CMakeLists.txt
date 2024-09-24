@@ -15,8 +15,6 @@ add_executable(${SERVER_NAME}
 )
 
 add_executable(${CLIENT_NAME}
-	src/sqrt-reactor.hpp
-	src/sqrt-callback.hpp
 	src/client.cpp
 )
 
