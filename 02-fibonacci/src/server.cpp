@@ -59,16 +59,16 @@ public:
 		}
 	}
 
-	grpc::Status GetFibonacciSequence(grpc::ServerContext* context, const fibonacci::FibonacciRequest* request, grpc::ServerWriter<fibonacci::FibonacciResponse>* writer) override
+	grpc::Status GetFibonaccisStream(grpc::ServerContext* context, const fibonacci::FibonacciRequest* request, grpc::ServerWriter<fibonacci::FibonacciResponse>* writer) override
 	{
-		unsigned int value = request->value();
+		unsigned int value = request->number();
 		std::cout << "Received on server: " << value << std::endl;
 
 		std::vector<uint32_t> fibonacci = GenerateFibonacci(value);
 		for (uint32_t i = 0; i < fibonacci.size(); i++) 
 		{
 			fibonacci::FibonacciResponse response;
-			response.set_value(fibonacci.at(i));
+			response.set_number(fibonacci.at(i));
 			writer->Write(response);
 		}
 

@@ -4,15 +4,25 @@ package fibonacci;
 
 message FibonacciRequest
 {
-	uint32 value = 1;
+	uint64 number = 1;
 }
 
 message FibonacciResponse
 {
-	uint32 value = 1;
+	uint64 number = 1;
 }
 
 service FibonacciService
 {
-	rpc GetFibonacciSequence(FibonacciRequest) returns (stream FibonacciResponse) {}
+	rpc GetFibonaccisStream(FibonacciRequest) returns (stream FibonacciResponse) {}
+}
+
+message FibonacciListResponse
+{
+	repeated uint64 number = 1;
+}
+
+service FibonacciSlowService
+{
+	rpc GetFibonacciList (FibonacciRequest) returns (FibonacciListResponse) {}
 }

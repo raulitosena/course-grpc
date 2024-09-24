@@ -11,7 +11,7 @@ public:
 	FibonacciReaderReactor(fibonacci::FibonacciService::Stub* stub, const fibonacci::FibonacciRequest& request)
 		: done(false)
 	{
-		stub->async()->GetFibonacciSequence(&this->context, &request, this);
+		stub->async()->GetFibonaccisStream(&this->context, &request, this);
 		this->StartCall();
 		this->StartRead(&this->response);
 	}
@@ -20,7 +20,7 @@ public:
 	{
 		if (ok)
 		{
-			this->fibonacci_numbers.push_back(this->response.value());
+			this->fibonacci_numbers.push_back(this->response.number());
 			this->StartRead(&this->response);
 		}
 	}
@@ -60,7 +60,7 @@ public:
 	std::vector<unsigned int> GetFibonacciSequence(unsigned int num) 
 	{
 		fibonacci::FibonacciRequest request;
-		request.set_value(num);
+		request.set_number(num);
 
 		FibonacciReaderReactor reactor(this->stub.get(), request);
 		std::vector<unsigned int> sequence;
