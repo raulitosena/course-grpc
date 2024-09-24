@@ -37,8 +37,3 @@ if (SRCS_CC)
 	target_link_libraries(${TARGET_LIB} gRPC::grpc++)
 
 endif()
-
-
-
-
-
