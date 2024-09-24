@@ -38,7 +38,7 @@ public:
 		std::unique_lock<std::mutex> lock(this->mtx);
 		this->cv.wait(lock, [this] { return this->done; });
 		sequence = std::move(this->fibonacci_numbers);
-		return std::move(this->status);
+		return this->status;
 	}
 
 private:

@@ -28,7 +28,7 @@ public:
 		std::unique_lock<std::mutex> lock(this->mtx);
 		this->cv.wait(lock, [this] { return this->done; });
 		result = this->response.result();
-		return std::move(this->status);
+		return this->status;
 	}
 
 private:

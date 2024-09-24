@@ -9,8 +9,8 @@ class EvensClientBidiReactor : public grpc::ClientBidiReactor<evens::Number, eve
 {
 public:
 	// Constructor: takes a stub and a list of numbers to send
-	EvensClientBidiReactor(evens::EvensService::Stub* stub, const std::vector<int>& numbers)
-		: numbers_to_send(numbers), current_number(numbers_to_send.begin()), done(false)
+	EvensClientBidiReactor(evens::EvensService::Stub* stub, std::vector<int> numbers)
+		: numbers_to_send(std::move(numbers)), current_number(numbers_to_send.begin()), done(false)
 	{
 		stub->async()->FindEvens(&this->context, this);
 		this->StartCall();
@@ -59,8 +59,8 @@ public:
 	{
 		std::unique_lock<std::mutex> lock(this->mtx);
 		this->cv.wait(lock, [this] { return this->done; });
-		evens = std::move(received_evens);
-		return std::move(this->status);
+		evens = std::move(this->received_evens);
+		return this->status;
 	}
 
 private:

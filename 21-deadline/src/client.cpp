@@ -44,7 +44,7 @@ public:
 			}
 		}
 		
-		return std::move(this->status);
+		return this->status;
 	}
 
 private:

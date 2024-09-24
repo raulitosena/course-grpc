@@ -18,7 +18,7 @@ public:
 		}
 
 		double result = std::sqrt(number);
-		response->set_result(std::move(result));
+		response->set_result(result);
 		this->Finish(grpc::Status::OK);
 	}
 

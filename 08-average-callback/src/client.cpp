@@ -43,7 +43,7 @@ public:
 		std::unique_lock<std::mutex> lock(this->mtx);
 		this->cv.wait(lock, [this] { return this->done; });
 		response = std::move(this->response);
-		return std::move(this->status);
+		return this->status;
 	}
 
 private:
