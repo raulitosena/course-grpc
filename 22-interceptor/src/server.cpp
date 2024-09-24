@@ -2,17 +2,8 @@
 #include <grpcpp/grpcpp.h>
 #include <proto/fibonacci.grpc.pb.h>
 #include <vector>
+#include "fibonacci.hpp"
 
-
-unsigned long long getFibonacci(unsigned long long n)
-{
-	if (n <= 1)
-	{
-		return n;
-	}
-	
-	return getFibonacci(n - 1) + getFibonacci(n - 2);
-}
 
 class FibonacciServerSlowReactor : public grpc::ServerUnaryReactor 
 {
@@ -20,13 +11,7 @@ public:
 	FibonacciServerSlowReactor(grpc::CallbackServerContext* context, const ::fibonacci::FibonacciRequest& request, ::fibonacci::FibonacciListResponse* response) 
 	{
 		uint64_t number = request.number();
-		std::vector<unsigned long long> fibonacci_list;
-
-		for (unsigned long long i = 0; i < number; ++i)
-		{
-			std::cerr << i << " " << std::flush;
-			fibonacci_list.push_back(getFibonacci(i));
-		}
+		std::vector<unsigned long long> fibonacci_list = getFibonacciSequence(number);
 		
 		for (auto &&num : fibonacci_list)
 		{

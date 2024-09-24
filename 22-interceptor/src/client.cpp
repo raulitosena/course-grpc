@@ -3,8 +3,34 @@
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
-#include <chrono>
 
+
+class LoggingInterceptor : public grpc::experimental::Interceptor 
+{
+public:
+	LoggingInterceptor(grpc::experimental::ClientRpcInfo* info) 
+	{
+	}
+
+	void Intercept(::grpc::experimental::InterceptorBatchMethods* methods) override {
+
+		if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_SEND_INITIAL_METADATA))
+		{
+			std::cout << "Reactor RPC call started: " << std::endl;
+		}
+
+		methods->Proceed();
+	}
+};
+
+class LoggingInterceptorFactory : public grpc::experimental::ClientInterceptorFactoryInterface
+{
+public:
+  	grpc::experimental::Interceptor* CreateClientInterceptor(grpc::experimental::ClientRpcInfo* info) override 
+	{
+	    return new LoggingInterceptor(info);
+  	}
+};
 
 class FibonacciClientReactor : public grpc::ClientUnaryReactor
 {
@@ -78,6 +104,7 @@ public:
 
 private:
 	std::unique_ptr<::fibonacci::FibonacciSlowService::Stub> stub;
+	
 };
 
 int main(int argc, char** argv) 
@@ -97,9 +124,12 @@ int main(int argc, char** argv)
 	{
 		port = std::stoi(argv[1]);
 		number = std::stoull(argv[2]);
-
 		std::string host = absl::StrFormat("localhost:%d", port);
-		channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
+
+		std::vector<std::unique_ptr<grpc::experimental::ClientInterceptorFactoryInterface>> interceptor_creators;
+		interceptor_creators.push_back(std::make_unique<LoggingInterceptorFactory>());
+		grpc::ChannelArguments args;
+		channel = grpc::experimental::CreateCustomChannelWithInterceptors(host, grpc::InsecureChannelCredentials(), args, std::move(interceptor_creators));
 		client = std::make_unique<FibonacciClient>(channel);
 	}
 	catch(const std::exception& e)
