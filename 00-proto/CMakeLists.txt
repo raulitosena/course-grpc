@@ -21,16 +21,24 @@ add_custom_target(${TARGET_PROTOC}
 	COMMAND protoc --proto_path="${CMAKE_CURRENT_LIST_DIR}/proto" --grpc_out="${CMAKE_CURRENT_LIST_DIR}/proto" --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` "${CMAKE_CURRENT_LIST_DIR}/proto/*.proto"
 	COMMENT "Generating protocol buffers and gRPC services from .proto files..."
 )
+set_property(TARGET ${TARGET_PROTOC} PROPERTY FOLDER ${PROJECT_NAME})
 
-add_library(${TARGET_LIB} STATIC
-	"${SRCS_CC}"
-)
+if (SRCS_CC)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-	add_dependencies(${TARGET_LIB} ${TARGET_PROTOC})
+	add_library(${TARGET_LIB} STATIC
+		"${SRCS_CC}"
+	)
+	set_property(TARGET ${TARGET_LIB} PROPERTY FOLDER ${PROJECT_NAME})
+
+	if(CMAKE_BUILD_TYPE STREQUAL "Release")
+		add_dependencies(${TARGET_LIB} ${TARGET_PROTOC})
+	endif()
+
+	target_link_libraries(${TARGET_LIB} gRPC::grpc++)
+
 endif()
 
-target_link_libraries(${TARGET_LIB} gRPC::grpc++)
 
-set_property(TARGET ${TARGET_LIB} PROPERTY FOLDER ${PROJECT_NAME})
-set_property(TARGET ${TARGET_PROTOC} PROPERTY FOLDER ${PROJECT_NAME})
+
+
+
