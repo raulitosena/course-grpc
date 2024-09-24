@@ -85,7 +85,6 @@ private:
 	std::unique_ptr<::fibonacci::FibonacciSlowService::Stub> stub;
 };
 
-
 int main(int argc, char** argv) 
 {
 	if (argc < 3 || argc > 4)

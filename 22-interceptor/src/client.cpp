@@ -1,88 +1,86 @@
-#include <grpcpp/grpcpp.h>
-#include <proto/fibonacci.pb.h>
 #include <proto/fibonacci.grpc.pb.h>
+#include <grpcpp/grpcpp.h>
+#include <iostream>
 #include <mutex>
 #include <condition_variable>
+#include <chrono>
 
 
-class FibonacciReaderReactor : public grpc::ClientReadReactor<fibonacci::FibonacciResponse>
+class FibonacciClientReactor : public grpc::ClientUnaryReactor
 {
 public:
-	FibonacciReaderReactor(fibonacci::FibonacciService::Stub* stub, const fibonacci::FibonacciRequest& request)
+	FibonacciClientReactor(::fibonacci::FibonacciSlowService::Stub* stub, const uint64_t& number)
 		: done(false)
 	{
-		stub->async()->GetFibonacciSequence(&this->context, &request, this);
+		this->request.set_number(number);
+		stub->async()->GetFibonacciList(&this->context, &this->request, &this->response, this);
 		this->StartCall();
-		this->StartRead(&this->response);
-	}
-
-	void OnReadDone(bool ok) override 
-	{
-		if (ok)
-		{
-			this->fibonacci_numbers.push_back(this->response.value());
-			this->StartRead(&this->response);
-		}
 	}
 
 	void OnDone(const grpc::Status& status) override
 	{
 		std::unique_lock<std::mutex> lock(this->mtx);
-		this->status = std::move(status);
+		this->status = status;
 		this->done = true;
 		this->cv.notify_one();
 	}
-	
-	grpc::Status Await(std::vector<unsigned int>& sequence)
+
+	grpc::Status Await(std::vector<unsigned long long>& result)
 	{
 		std::unique_lock<std::mutex> lock(this->mtx);
 		this->cv.wait(lock, [this] { return this->done; });
-		sequence = std::move(this->fibonacci_numbers);
+
+		if (this->status.ok()) 
+		{
+			for (size_t i = 0; i < this->response.number_size(); i++)
+			{
+				unsigned long long num = this->response.number(i);
+				result.push_back(num);
+			}
+		}
+		
 		return std::move(this->status);
 	}
 
 private:
 	grpc::ClientContext context;
-	fibonacci::FibonacciResponse response;
+	::fibonacci::FibonacciListResponse response;
+	::fibonacci::FibonacciRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
-	bool done = false;
-	std::vector<unsigned int> fibonacci_numbers;
+	bool done;
 };
 
-class FibonacciClient {
+class FibonacciClient
+{
 public:
-	explicit FibonacciClient(std::shared_ptr<grpc::Channel> channel) : stub(fibonacci::FibonacciService::NewStub(channel))
-	{		
+	explicit FibonacciClient(std::shared_ptr<grpc::Channel> channel) 
+		: stub(::fibonacci::FibonacciSlowService::NewStub(channel))
+	{
 	}
 
-	std::vector<unsigned int> GetFibonacciSequence(unsigned int num) 
+	std::vector<unsigned long long> Calculate(uint64_t number) 
 	{
-		fibonacci::FibonacciRequest request;
-		request.set_value(num);
+		FibonacciClientReactor reactor(this->stub.get(), number);
+		std::vector<unsigned long long> fibonacci_list;
+		grpc::Status status = reactor.Await(fibonacci_list);
 
-		FibonacciReaderReactor reactor(this->stub.get(), request);
-		std::vector<unsigned int> sequence;
-		grpc::Status status = reactor.Await(sequence);
-
-		if (status.ok()) 
+		if (!status.ok())
 		{
-			std::cout << "GetFibonacciSequence RPC succeeded." << std::endl;
-		} 
-		else
-		{
-			throw std::runtime_error(status.error_message());
+			std::stringstream ss;
+			ss << status.error_message() << " (" << status.error_code() << ")";
+			throw std::runtime_error(ss.str());
 		}
 
-		return sequence;
+		return fibonacci_list;
 	}
 
 private:
-	std::unique_ptr<fibonacci::FibonacciService::Stub> stub;
+	std::unique_ptr<::fibonacci::FibonacciSlowService::Stub> stub;
 };
 
-int main(int argc, char** argv)
+int main(int argc, char** argv) 
 {
 	if (argc != 3)
 	{
@@ -90,17 +88,31 @@ int main(int argc, char** argv)
 		return 1001;
 	}
 
+	int port;
+	uint64_t number;
+	std::shared_ptr<grpc::Channel> channel;
+	std::unique_ptr<FibonacciClient> client;
+
 	try
 	{
-		int port = std::stoi(argv[1]);
-		uint32_t limit = std::stoul(argv[2]);
+		port = std::stoi(argv[1]);
+		number = std::stoull(argv[2]);
+
 		std::string host = absl::StrFormat("localhost:%d", port);
+		channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
+		client = std::make_unique<FibonacciClient>(channel);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+		return 1002;
+	}
 
-		std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-		FibonacciClient client(channel);
-		std::vector<unsigned int> sequence = client.GetFibonacciSequence(limit);
+	try
+	{
+		std::vector<unsigned long long> sequence = client->Calculate(number);
 
-		std::cout << "From Fibonacci server: ";
+		std::cout << "From Fibonacci server: \n";
 		for (auto&& val : sequence)
 		{
 			std::cout << val << " ";

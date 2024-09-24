@@ -1,79 +1,58 @@
 #include <iostream>
 #include <grpcpp/grpcpp.h>
-#include <proto/fibonacci.pb.h>
 #include <proto/fibonacci.grpc.pb.h>
 #include <vector>
 
 
-class FibonacciWriterReactor : public grpc::ServerWriteReactor<fibonacci::FibonacciResponse>
+unsigned long long getFibonacci(unsigned long long n)
+{
+	if (n <= 1)
+	{
+		return n;
+	}
+	
+	return getFibonacci(n - 1) + getFibonacci(n - 2);
+}
+
+class FibonacciServerSlowReactor : public grpc::ServerUnaryReactor 
 {
 public:
-	FibonacciWriterReactor(const fibonacci::FibonacciRequest* request)
+	FibonacciServerSlowReactor(grpc::CallbackServerContext* context, const ::fibonacci::FibonacciRequest& request, ::fibonacci::FibonacciListResponse* response) 
 	{
-		this->SetResponseStream(request->value());
-		this->current_response = stream_responses.begin();
-		this->NextWrite();
+		uint64_t number = request.number();
+		std::vector<unsigned long long> fibonacci_list;
+
+		for (unsigned long long i = 0; i < number; ++i)
+		{
+			std::cerr << i << " " << std::flush;
+			fibonacci_list.push_back(getFibonacci(i));
+		}
+		
+		for (auto &&num : fibonacci_list)
+		{
+			response->add_number(num);
+		}
+
+		this->Finish(grpc::Status::OK);
 	}
 
-	void OnDone() override
+private:
+	void OnDone() override 
 	{
-		std::cout << "RPC Completed" << std::endl;
+		std::cerr << "RPC done!" << std::endl;
 		delete this;
 	}
 
 	void OnCancel() override 
 	{
-		std::cerr << "RPC Cancelled" << std::endl;
+		std::cerr << "RPC cancelled!" << std::endl;
 	}
-
-	void OnWriteDone(bool ok) override
-	{
-		if (!ok) 
-		{
-			this->Finish(grpc::Status(grpc::StatusCode::UNKNOWN, "Write failed."));
-		}
-
-		this->NextWrite();
-	}
-	
-private:
-	void NextWrite()
-	{
-		if (this->current_response == this->stream_responses.end())
-		{
-			Finish(grpc::Status::OK);
-			return;
-		}
-
-		const fibonacci::FibonacciResponse& response = *this->current_response;
-		this->current_response++;
-		this->StartWrite(&response);
-	}
-
-	void SetResponseStream(unsigned int limit)
-	{
-		this->stream_responses.reserve(limit);
-		unsigned int a = 0, b = 1;
-		for (unsigned int i = 0; i < limit; i++)
-		{
-			fibonacci::FibonacciResponse response;
-			response.set_value(a);
-			this->stream_responses.push_back(std::move(response));
-			unsigned int next = a + b;
-			a = b;
-			b = next;
-		}
-	}
-
-private:
-	std::vector<fibonacci::FibonacciResponse> stream_responses;
-	std::vector<fibonacci::FibonacciResponse>::iterator current_response;
 };
 
-class FibonacciServiceRpc : public fibonacci::FibonacciService::CallbackService
+class FibonacciSlowServiceRpc : public ::fibonacci::FibonacciSlowService::CallbackService
 {
 public:
-	FibonacciServiceRpc(unsigned short port)
+	FibonacciSlowServiceRpc(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
@@ -96,15 +75,14 @@ public:
 		}
 	}
 
-	grpc::ServerWriteReactor<fibonacci::FibonacciResponse>* GetFibonacciSequence(grpc::CallbackServerContext* context, const fibonacci::FibonacciRequest* request) override
+	grpc::ServerUnaryReactor* GetFibonacciList(grpc::CallbackServerContext* context, const ::fibonacci::FibonacciRequest* request, ::fibonacci::FibonacciListResponse* response) override
 	{
-		return new FibonacciWriterReactor(request);
+		return new FibonacciServerSlowReactor(context, *request, response);
 	}
-
+	
 private:
 	std::string host;
 };
-
 
 int main(int argc, char** argv)
 {
@@ -117,7 +95,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		FibonacciServiceRpc service(port);
+		FibonacciSlowServiceRpc service(port);
 		service.Run();
 	} 
 	catch (const std::exception& e)
@@ -125,6 +103,6 @@ int main(int argc, char** argv)
 		std::cerr << "Error: " << e.what() << std::endl;
 		return 1002;
 	}
-
+	
 	return 0;
 }
