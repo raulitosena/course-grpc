@@ -16,13 +16,13 @@ public:
 	 	fibonacci::FibonacciRequest request;
 		fibonacci::FibonacciResponse response;
 
-	 	request.set_value(num);
-		std::unique_ptr< grpc::ClientReader<fibonacci::FibonacciResponse> > reader(this->stub->GetFibonacciSequence(&context, request));
+	 	request.set_number(num);
+		std::unique_ptr< grpc::ClientReader<fibonacci::FibonacciResponse> > reader(this->stub->GetFibonaccisStream(&context, request));
 		std::vector<unsigned int> sequence;
 			
         while (reader->Read(&response))
 		{
-			sequence.push_back(response.value());
+			sequence.push_back(response.number());
         }
 
         grpc::Status status = reader->Finish();
