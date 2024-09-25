@@ -2,8 +2,30 @@
 #include <grpcpp/grpcpp.h>
 #include <proto/fibonacci.grpc.pb.h>
 #include <vector>
-#include "fibonacci.hpp"
+#include "server_interceptor.hpp"
 
+
+unsigned long long getFibonacci(unsigned long long n)
+{
+	if (n <= 1)
+	{
+		return n;
+	}
+	
+	return getFibonacci(n - 1) + getFibonacci(n - 2);
+}
+
+std::vector<unsigned long long> getFibonacciSequence(unsigned long long limit)
+{
+	std::vector<unsigned long long> fibonacci_list;
+
+	for (unsigned long long i = 0; i < limit; ++i)
+	{
+		fibonacci_list.push_back(getFibonacci(i));
+	}
+
+	return fibonacci_list;
+}
 
 class FibonacciServerSlowReactor : public grpc::ServerUnaryReactor 
 {
@@ -46,6 +68,13 @@ public:
 	{
 		grpc::ServerBuilder builder;
 		builder.AddListeningPort(this->host, grpc::InsecureServerCredentials());
+
+		// Bind interceptor
+        std::vector<std::unique_ptr<grpc::experimental::ServerInterceptorFactoryInterface>> interceptor_creators;
+        interceptor_creators.push_back(std::make_unique<ServerLogInterceptorFactory>());
+        builder.experimental().SetInterceptorCreators(std::move(interceptor_creators));
+
+		// Register RCP server & start
 		builder.RegisterService(this);
 		std::shared_ptr<grpc::Server> server = builder.BuildAndStart();
 
@@ -85,7 +114,7 @@ int main(int argc, char** argv)
 	} 
 	catch (const std::exception& e)
 	{
-		std::cerr << "Error: " << e.what() << std::endl;
+		std::cerr << e.what() << '\n';
 		return 1002;
 	}
 	

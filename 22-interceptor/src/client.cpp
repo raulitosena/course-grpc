@@ -2,35 +2,10 @@
 #include <grpcpp/grpcpp.h>
 #include <iostream>
 #include <mutex>
+#include <vector>
 #include <condition_variable>
+#include "client_interceptor.hpp"
 
-
-class LoggingInterceptor : public grpc::experimental::Interceptor 
-{
-public:
-	LoggingInterceptor(grpc::experimental::ClientRpcInfo* info) 
-	{
-	}
-
-	void Intercept(::grpc::experimental::InterceptorBatchMethods* methods) override {
-
-		if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_SEND_INITIAL_METADATA))
-		{
-			std::cout << "Reactor RPC call started: " << std::endl;
-		}
-
-		methods->Proceed();
-	}
-};
-
-class LoggingInterceptorFactory : public grpc::experimental::ClientInterceptorFactoryInterface
-{
-public:
-  	grpc::experimental::Interceptor* CreateClientInterceptor(grpc::experimental::ClientRpcInfo* info) override 
-	{
-	    return new LoggingInterceptor(info);
-  	}
-};
 
 class FibonacciClientReactor : public grpc::ClientUnaryReactor
 {
@@ -103,55 +78,56 @@ public:
 	}
 
 private:
-	std::unique_ptr<::fibonacci::FibonacciSlowService::Stub> stub;
-	
+	std::unique_ptr<::fibonacci::FibonacciSlowService::Stub> stub;	
 };
 
 int main(int argc, char** argv) 
 {
+	int port;
+	uint64_t number;
+	std::string host;
+
+
 	if (argc != 3)
 	{
 		std::cerr << "Usage: ./client <port> <limit>" << std::endl;
 		return 1001;
 	}
 
-	int port;
-	uint64_t number;
-	std::shared_ptr<grpc::Channel> channel;
-	std::unique_ptr<FibonacciClient> client;
-
 	try
 	{
 		port = std::stoi(argv[1]);
 		number = std::stoull(argv[2]);
-		std::string host = absl::StrFormat("localhost:%d", port);
-
-		std::vector<std::unique_ptr<grpc::experimental::ClientInterceptorFactoryInterface>> interceptor_creators;
-		interceptor_creators.push_back(std::make_unique<LoggingInterceptorFactory>());
-		grpc::ChannelArguments args;
-		channel = grpc::experimental::CreateCustomChannelWithInterceptors(host, grpc::InsecureChannelCredentials(), args, std::move(interceptor_creators));
-		client = std::make_unique<FibonacciClient>(channel);
+		host = absl::StrFormat("localhost:%d", port);
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
 		return 1002;
-	}
+	}	
 
 	try
 	{
-		std::vector<unsigned long long> sequence = client->Calculate(number);
+		// Bind interceptor
+		std::vector<std::unique_ptr<grpc::experimental::ClientInterceptorFactoryInterface>> interceptor_creators;
+		interceptor_creators.push_back(std::make_unique<ClientLogInterceptorFactory>());
+		grpc::ChannelArguments args;
+		std::shared_ptr<grpc::Channel> channel = grpc::experimental::CreateCustomChannelWithInterceptors(host, grpc::InsecureChannelCredentials(), args, std::move(interceptor_creators));
+		
+		// Set channel
+		std::unique_ptr<FibonacciClient> client = std::make_unique<FibonacciClient>(channel);		
 
+		// Calculate fibonacci
+		std::vector<unsigned long long> sequence = client->Calculate(number);
 		std::cout << "From Fibonacci server: \n";
 		for (auto&& val : sequence)
-		{
 			std::cout << val << " ";
-		}
 		std::cout << std::endl;
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
+		return 1003;
 	}
 
 	return 0;
