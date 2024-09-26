@@ -15,6 +15,21 @@ public:
 
 	void Intercept(grpc::experimental::InterceptorBatchMethods* methods) override
 	{
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_SEND_INITIAL_METADATA)) { std::cout << "PRE_SEND_INITIAL_METADATA" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_SEND_MESSAGE)) { std::cout << "PRE_SEND_MESSAGE" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::POST_SEND_MESSAGE)) { std::cout << "POST_SEND_MESSAGE" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_SEND_STATUS)) { std::cout << "PRE_SEND_STATUS" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_SEND_CLOSE)) { std::cout << "PRE_SEND_CLOSE" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_RECV_INITIAL_METADATA)) { std::cout << "PRE_RECV_INITIAL_METADATA" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_RECV_MESSAGE)) { std::cout << "PRE_RECV_MESSAGE" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_RECV_STATUS)) { std::cout << "PRE_RECV_STATUS" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::POST_RECV_INITIAL_METADATA)) { std::cout << "POST_RECV_INITIAL_METADATA" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::POST_RECV_MESSAGE)) { std::cout << "POST_RECV_MESSAGE" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::POST_RECV_STATUS)) { std::cout << "POST_RECV_STATUS" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::POST_RECV_CLOSE)) { std::cout << "POST_RECV_CLOSE" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_SEND_CANCEL)) { std::cout << "PRE_SEND_CANCEL" << std::endl; };
+		// if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::NUM_INTERCEPTION_HOOKS)) { std::cout << "NUM_INTERCEPTION_HOOKS" << std::endl; };
+
 		bool hijack = false;
 		// The hijack flag is set when the interceptor decides to stop the gRPC request 
 		// from reaching the server and instead use the cached response. If the interceptor
