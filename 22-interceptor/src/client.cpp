@@ -110,7 +110,7 @@ int main(int argc, char** argv)
 	{
 		// Bind interceptor
 		std::vector<std::unique_ptr<grpc::experimental::ClientInterceptorFactoryInterface>> interceptor_creators;
-		interceptor_creators.push_back(std::make_unique<ClientLogInterceptorFactory>());
+		interceptor_creators.push_back(std::make_unique<CachingFiboInterceptorFactory>());
 		grpc::ChannelArguments args;
 		std::shared_ptr<grpc::Channel> channel = grpc::experimental::CreateCustomChannelWithInterceptors(host, grpc::InsecureChannelCredentials(), args, std::move(interceptor_creators));
 		
@@ -118,8 +118,15 @@ int main(int argc, char** argv)
 		std::unique_ptr<FibonacciClient> client = std::make_unique<FibonacciClient>(channel);		
 
 		// Calculate fibonacci
-		std::vector<unsigned long long> sequence = client->Calculate(number);
-		std::cout << "From Fibonacci server: \n";
+		std::vector<unsigned long long> sequence;
+		sequence = client->Calculate(number);
+		std::cout << "Response (from server): \n";
+		for (auto&& val : sequence)
+			std::cout << val << " ";
+		std::cout << std::endl;
+
+		sequence = client->Calculate(number);
+		std::cout << "Response (from cache): \n";
 		for (auto&& val : sequence)
 			std::cout << val << " ";
 		std::cout << std::endl;
