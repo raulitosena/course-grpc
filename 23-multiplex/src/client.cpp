@@ -4,6 +4,8 @@
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
+#include <thread>
+
 
 
 class DoubleReactor : public grpc::ClientUnaryReactor
@@ -68,7 +70,6 @@ private:
 	std::unique_ptr<::math::MathService::Stub> stub;
 };
 
-
 class TripleReactor : public grpc::ClientUnaryReactor
 {
 public:
@@ -131,37 +132,88 @@ private:
 	std::unique_ptr<::math::MathService::Stub> stub;
 };
 
+void run_double_client(DoubleClient* client, int32_t number, int32_t* result_double)
+{
+	try
+	{
+		*result_double = client->Calculate(number);
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "DoubleClient Error: " << e.what() << std::endl;
+	}
+}
+
+void run_triple_client(TripleClient* client, int32_t number, int32_t* result_triple)
+{
+	try
+	{
+		*result_triple = client->Calculate(number);
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "TripleClient Error: " << e.what() << std::endl;
+	}
+}
+
 int main(int argc, char** argv) 
 {
+	unsigned short port;
+	int32_t number;
+	std::string host;
+	std::shared_ptr<grpc::Channel> channel;
+
 	if (argc != 3)
 	{
-		std::cerr << "Usage: ./client <port>" << std::endl;
+		std::cerr << "Usage: ./client <port> <number>" << std::endl;
 		return 1001;
 	}
 
-	std::unique_ptr<DoubleClient> client_double;
-	std::unique_ptr<TripleClient> client_triple;
-
 	try
 	{
-		unsigned short port = std::stoi(argv[1]);
-		int32_t number = std::stoi(argv[2]);
-		std::string host = absl::StrFormat("localhost:%d", port);		
-		std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-
-		client_double = std::make_unique<DoubleClient>(channel);
-		int32_t result_double = client_double->Calculate(number);		
-		std::cout << number << " -> " << result_double << std::endl;
-
-		client_triple = std::make_unique<TripleClient>(channel);
-		int32_t result_triple = client_triple->Calculate(number);		
-		std::cout << number << " -> " << result_triple << std::endl;
+		port = std::stoi(argv[1]);
+		number = std::stoi(argv[2]);
+		host = absl::StrFormat("localhost:%d", port);
+		channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
 	}
-	catch(const std::exception& e)
+	catch (const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
 		return 1002;
 	}
-	
+
+	// Declare arrays to store results
+	std::vector<int32_t> results_double(number + 1);
+	std::vector<int32_t> results_triple(number + 1);
+
+	std::unique_ptr<DoubleClient> client_double = std::make_unique<DoubleClient>(channel);
+	std::unique_ptr<TripleClient> client_triple = std::make_unique<TripleClient>(channel);
+
+	// Vector to hold threads
+	std::vector<std::thread> threads;
+
+	std::cout << "Computing..." << std::endl;
+
+	// Launch threads for each number from 0 to the input number
+	for (int32_t i = 0; i <= number; ++i)
+	{
+		// Create threads for both Double and Triple clients, passing result arrays by reference
+		threads.emplace_back(run_double_client, client_double.get(), i, &results_double[i]);
+		threads.emplace_back(run_triple_client, client_triple.get(), i, &results_triple[i]);
+	}
+
+	// Join all threads
+	for (auto& th : threads)
+	{
+		th.join();
+	}
+
+	// Print final results
+	std::cout << "Final Results:" << std::endl;
+	for (int32_t i = 0; i <= number; ++i)
+	{
+		std::cout << i << " -> Double: " << results_double[i] << ", Triple: " << results_triple[i] << std::endl;
+	}
+
 	return 0;
 }
