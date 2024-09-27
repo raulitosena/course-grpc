@@ -4,27 +4,6 @@
 #include <cmath>
 
 
-class MathOffsetServiceImpl : public ::math::MathOffsetService::CallbackService
-{
-public:
-	::grpc::ServerUnaryReactor* CalculateIncrement(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
-	{
-		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
-		response->set_result(request->number() + 1);
-		reactor->Finish(::grpc::Status::OK);
-		return reactor;
-	}
-
-	::grpc::ServerUnaryReactor* CalculateDecrement(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
-	{
-		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
-		response->set_result(request->number() - 1);
-		reactor->Finish(::grpc::Status::OK);
-		return reactor;
-	}
-	
-};
-
 class MathServiceImpl : public ::math::MathService::CallbackService
 {
 public:
@@ -57,7 +36,6 @@ public:
 	{
 		this->builder.AddListeningPort(this->host, ::grpc::InsecureServerCredentials());
 		this->builder.RegisterService(&this->math_service);
-		this->builder.RegisterService(&this->math_offset_service);
 		std::shared_ptr<::grpc::Server> server = this->builder.BuildAndStart();
 
 		if (server)
@@ -75,7 +53,6 @@ private:
 	std::string host;
 	::grpc::ServerBuilder builder;
 	MathServiceImpl math_service;
-	MathOffsetServiceImpl math_offset_service;
 };
 
 int main(int argc, char** argv)

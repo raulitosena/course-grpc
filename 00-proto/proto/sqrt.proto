@@ -32,10 +32,3 @@ service MathService
 	rpc CalculateTriple(OperandRequest) returns (ResultResponse) {}
 	rpc CalculateDouble(OperandRequest) returns (ResultResponse) {}
 }
-
-
-service MathOffsetService
-{
-	rpc CalculateIncrement(OperandRequest) returns (ResultResponse) {}
-	rpc CalculateDecrement(OperandRequest) returns (ResultResponse) {}
-}
