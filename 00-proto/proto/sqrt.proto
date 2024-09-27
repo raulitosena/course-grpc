@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package squareroot;
+package math;
 
 message SqrtRequest
 {
@@ -15,4 +15,27 @@ message SqrtResponse
 service SqrtService
 {
 	rpc Calculate(SqrtRequest) returns (SqrtResponse) {}
+}
+
+message OperandRequest
+{
+	int32 number = 1;
+}
+
+message ResultResponse
+{
+	int32 result = 1;
+}
+
+service MathService
+{
+	rpc CalculateTriple(OperandRequest) returns (ResultResponse) {}
+	rpc CalculateDouble(OperandRequest) returns (ResultResponse) {}
+}
+
+
+service MathOffsetService
+{
+	rpc CalculateIncrement(OperandRequest) returns (ResultResponse) {}
+	rpc CalculateDecrement(OperandRequest) returns (ResultResponse) {}
 }

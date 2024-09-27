@@ -4,89 +4,43 @@
 #include <cmath>
 
 
-class DoubleReactor : public grpc::ServerUnaryReactor 
+class MathOffsetServiceImpl : public ::math::MathOffsetService::CallbackService
 {
 public:
-	DoubleReactor(const ::squareroot::SqrtRequest& request, ::squareroot::SqrtResponse* response) 
+	::grpc::ServerUnaryReactor* CalculateIncrement(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
 	{
-		int number = request.number();
-		
-		double result = 2 * number;
-		response->set_result(result);
-		this->Finish(grpc::Status::OK);
+		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
+		response->set_result(request->number() + 1);
+		reactor->Finish(::grpc::Status::OK);
+		return reactor;
 	}
 
-private:
-	void OnDone() override 
+	::grpc::ServerUnaryReactor* CalculateDecrement(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
 	{
-		delete this;
+		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
+		response->set_result(request->number() - 1);
+		reactor->Finish(::grpc::Status::OK);
+		return reactor;
 	}
-
-	void OnCancel() override 
-	{
-		std::cerr << "RPC Cancelled" << std::endl;
-	}
+	
 };
 
-class TripleReactor : public grpc::ServerUnaryReactor 
+class MathServiceImpl : public ::math::MathService::CallbackService
 {
 public:
-	TripleReactor(const ::squareroot::SqrtRequest& request, ::squareroot::SqrtResponse* response) 
+	::grpc::ServerUnaryReactor* CalculateDouble(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
 	{
-		int number = request.number();
-		
-		double result = 3 * number;
-		response->set_result(result);
-		this->Finish(grpc::Status::OK);
-	}
-
-private:
-	void OnDone() override 
-	{
-		delete this;
-	}
-
-	void OnCancel() override 
-	{
-		std::cerr << "RPC Cancelled" << std::endl;
-	}
-};
-
-class QuadrupleReactor : public grpc::ServerUnaryReactor 
-{
-public:
-	QuadrupleReactor(const ::squareroot::SqrtRequest& request, ::squareroot::SqrtResponse* response) 
-	{
-		int number = request.number();
-		
-		double result = 4 * number;
-		response->set_result(result);
-		this->Finish(grpc::Status::OK);
-	}
-
-private:
-	void OnDone() override 
-	{
-		delete this;
-	}
-
-	void OnCancel() override 
-	{
-		std::cerr << "RPC Cancelled" << std::endl;
-	}
-};
-
-
-
-
-class DoubleRpc : public ::squareroot::SqrtService::CallbackService
-{
-public:
-	grpc::ServerUnaryReactor* Calculate(grpc::CallbackServerContext* context, const ::squareroot::SqrtRequest* request, ::squareroot::SqrtResponse* response) override
-	{
-		grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
+		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
 		response->set_result(2 * request->number());
-		reactor->Finish(grpc::Status::OK);
+		reactor->Finish(::grpc::Status::OK);
+		return reactor;
+	}
+
+	::grpc::ServerUnaryReactor* CalculateTriple(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
+	{
+		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
+		response->set_result(3 * request->number());
+		reactor->Finish(::grpc::Status::OK);
 		return reactor;
 	}
 };
@@ -101,9 +55,10 @@ public:
 
 	void Run()
 	{
-		this->builder.AddListeningPort(this->host, grpc::InsecureServerCredentials());
-		this->builder.RegisterService(&this->double_rpc);
-		std::shared_ptr<grpc::Server> server = this->builder.BuildAndStart();
+		this->builder.AddListeningPort(this->host, ::grpc::InsecureServerCredentials());
+		this->builder.RegisterService(&this->math_service);
+		this->builder.RegisterService(&this->math_offset_service);
+		std::shared_ptr<::grpc::Server> server = this->builder.BuildAndStart();
 
 		if (server)
 		{
@@ -118,8 +73,9 @@ public:
 
 private:
 	std::string host;
-	grpc::ServerBuilder builder;
-	DoubleRpc double_rpc;
+	::grpc::ServerBuilder builder;
+	MathServiceImpl math_service;
+	MathOffsetServiceImpl math_offset_service;
 };
 
 int main(int argc, char** argv)

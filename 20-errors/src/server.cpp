@@ -7,7 +7,7 @@
 class SqrtReactor : public grpc::ServerUnaryReactor 
 {
 public:
-	SqrtReactor(const ::squareroot::SqrtRequest& request, ::squareroot::SqrtResponse* response) 
+	SqrtReactor(const ::math::SqrtRequest& request, ::math::SqrtResponse* response) 
 	{
 		int number = request.number();
 
@@ -34,7 +34,7 @@ private:
 	}
 };
 
-class SqrtServiceRpc : public ::squareroot::SqrtService::CallbackService
+class SqrtServiceRpc : public ::math::SqrtService::CallbackService
 {
 public:
 	SqrtServiceRpc(unsigned short port)
@@ -60,7 +60,7 @@ public:
 		}
 	}
 
-	grpc::ServerUnaryReactor* Calculate(grpc::CallbackServerContext* context, const ::squareroot::SqrtRequest* request, ::squareroot::SqrtResponse* response) override
+	grpc::ServerUnaryReactor* Calculate(grpc::CallbackServerContext* context, const ::math::SqrtRequest* request, ::math::SqrtResponse* response) override
 	{
 		return new SqrtReactor(*request, response);
 	}
