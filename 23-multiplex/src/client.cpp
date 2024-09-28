@@ -188,10 +188,10 @@ int main(int argc, char** argv)
 
 	// Declare arrays to store results
 	std::vector<int32_t> results_double(number + 1);
-	//std::vector<int32_t> results_triple(number + 1);
+	std::vector<int32_t> results_triple(number + 1);
 
 	std::unique_ptr<DoubleClient> client_double = std::make_unique<DoubleClient>(channel);
-	//std::unique_ptr<TripleClient> client_triple = std::make_unique<TripleClient>(channel);
+	std::unique_ptr<TripleClient> client_triple = std::make_unique<TripleClient>(channel);
 
 	// Vector to hold threads
 	std::vector<std::thread> threads;
@@ -200,10 +200,10 @@ int main(int argc, char** argv)
 
 	// Launch threads for each number from 0 to the input number
 	for (int32_t i = 0; i <= number; ++i)
-	{
+	{		
 		// Create threads for both Double and Triple clients, passing result arrays by reference
 		threads.emplace_back(run_double_client, client_double.get(), i, &results_double[i]);
-		//threads.emplace_back(run_triple_client, client_triple.get(), i, &results_triple[i]);
+		threads.emplace_back(run_triple_client, client_triple.get(), i, &results_triple[i]);
 	}
 
 	// Join all threads
@@ -216,8 +216,7 @@ int main(int argc, char** argv)
 	std::cout << "Final Results:" << std::endl;
 	for (int32_t i = 0; i <= number; ++i)
 	{
-		//std::cout << i << " -> Double: " << results_double[i] << ", Triple: " << results_triple[i] << std::endl;
-		std::cout << i << " -> Double: " << results_double[i] << std::endl;
+		std::cout << i << " -> Double: " << results_double[i] << ", Triple: " << results_triple[i] << std::endl;
 	}
 
 	return 0;
