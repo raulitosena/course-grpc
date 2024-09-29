@@ -1,6 +1,6 @@
 #include <iostream>
 #include <grpcpp/grpcpp.h>
-#include <proto/sqrt.grpc.pb.h>
+#include <proto/math.grpc.pb.h>
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
@@ -15,7 +15,7 @@ public:
 		: done(false)
 	{
 		this->request.set_number(number);
-		stub->async()->CalculateDouble(&this->context, &this->request, &this->response, this);
+		stub->async()->Calculate2x(&this->context, &this->request, &this->response, this);
 		this->StartCall();
 	}
 
@@ -79,7 +79,7 @@ public:
 		: done(false)
 	{
 		this->request.set_number(number);
-		stub->async()->CalculateTriple(&this->context, &this->request, &this->response, this);
+		stub->async()->Calculate3x(&this->context, &this->request, &this->response, this);
 		this->StartCall();
 	}
 

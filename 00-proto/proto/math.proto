@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package math;
+
+message SqrtRequest
+{
+	int32 number = 1;
+}
+
+message SqrtResponse
+{
+	double result = 1;
+}
+
+service SqrtService
+{
+	rpc Calculate(SqrtRequest) returns (SqrtResponse) {}
+}
+
+message OperandRequest
+{
+	int32 number = 1;
+}
+
+message ResultResponse
+{
+	int32 result = 1;
+}
+
+service MathService
+{
+	rpc Calculate2x(OperandRequest) returns (ResultResponse) {}
+	rpc Calculate3x(OperandRequest) returns (ResultResponse) {}
+	rpc Calculate4x(OperandRequest) returns (ResultResponse) {}
+	rpc Calculate5x(OperandRequest) returns (ResultResponse) {}
+	rpc Calculate6x(OperandRequest) returns (ResultResponse) {}
+	rpc Calculate7x(OperandRequest) returns (ResultResponse) {}
+	rpc Calculate8x(OperandRequest) returns (ResultResponse) {}
+	rpc Calculate9x(OperandRequest) returns (ResultResponse) {}
+}
