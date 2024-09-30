@@ -11,11 +11,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(${SERVER_NAME}
-src/server.cpp
+    src/server.cpp
 )
 
 add_executable(${CLIENT_NAME}
-src/client.cpp
+    src/client.cpp
 )
 
 target_include_directories(${SERVER_NAME} PRIVATE ${GRPC_DIR}/00-proto)
