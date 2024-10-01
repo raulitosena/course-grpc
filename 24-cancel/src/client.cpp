@@ -124,13 +124,15 @@ int main(int argc, char** argv)
 	}
 
 	// Start the cancellation thread in main
-	std::thread cancel_thread([&client]() {
+	std::thread cancel_thread([&client]()
+	{
 		std::cout << "Press 'c' to cancel the request..." << std::endl;
 		char c;
 		std::cin >> c;
-		if (c == 'c') {
+		if (c == 'c')
+		{
 			client->Cancel();
-			std::cout << "Request canceled!" << std::endl;
+			std::cout << "Client sent cancellation request!" << std::endl;
 		}
 	});
 
@@ -138,7 +140,6 @@ int main(int argc, char** argv)
 	{
 		std::vector<unsigned long long> sequence = client->Calculate(number);
 
-		std::cout << "From Fibonacci server: \n";
 		for (auto&& val : sequence)
 		{
 			std::cout << val << " ";
@@ -150,7 +151,7 @@ int main(int argc, char** argv)
 		std::cerr << e.what() << '\n';
 	}
 
-	cancel_thread.join();  // Ensure the cancellation thread finishes before exiting
+	cancel_thread.join();
 
 	return 0;
 }
