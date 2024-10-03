@@ -1,4 +1,4 @@
-#include <proto/fibonacci.grpc.pb.h>
+#include <proto/sum.grpc.pb.h>
 #include <grpcpp/grpcpp.h>
 #include <iostream>
 #include <mutex>
@@ -6,14 +6,29 @@
 #include <thread>
 #include <chrono>
 
-class FibonacciClientReactor : public grpc::ClientUnaryReactor
+
+constexpr std::string_view kRetryPolicy =
+	"{\"methodConfig\" : [{"
+	"   \"name\" : [{\"service\": \"helloworld.Greeter\"}],"
+	"   \"waitForReady\": true,"
+	"   \"retryPolicy\": {"
+	"     \"maxAttempts\": 4,"
+	"     \"initialBackoff\": \"1s\","
+	"     \"maxBackoff\": \"120s\","
+	"     \"backoffMultiplier\": 1.0,"
+	"     \"retryableStatusCodes\": [\"UNAVAILABLE\"]"
+	"    }"
+	"}]}";
+
+class SumClientReactor : public grpc::ClientUnaryReactor
 {
 public:
-	FibonacciClientReactor(::fibonacci::FibonacciSlowService::Stub* stub, const uint64_t& number)
+	SumClientReactor(::sum::SumService::Stub* stub, int op1, int op2)
 		: done(false)
 	{
-		this->request.set_number(number);
-		stub->async()->GetFibonacciList(&this->context, &this->request, &this->response, this);
+		this->request.set_op1(op1);
+		this->request.set_op2(op2);
+		stub->async()->ComputeSum(&this->context, &this->request, &this->response, this);
 		this->StartCall();
 	}
 
@@ -25,133 +40,72 @@ public:
 		this->cv.notify_one();
 	}
 
-	grpc::Status Await(std::vector<unsigned long long>& result)
+	grpc::Status Await(int& result)
 	{
 		std::unique_lock<std::mutex> lock(this->mtx);
 		this->cv.wait(lock, [this] { return this->done; });
-
-		if (this->status.ok()) 
-		{
-			for (size_t i = 0; i < this->response.number_size(); i++)
-			{
-				unsigned long long num = this->response.number(i);
-				result.push_back(num);
-			}
-		}
-		
+		result = this->response.result();
 		return this->status;
-	}
-
-	void Cancel() 
-	{
-		this->context.TryCancel();
 	}
 
 private:
 	grpc::ClientContext context;
-	::fibonacci::FibonacciListResponse response;
-	::fibonacci::FibonacciRequest request;
+	::sum::SumResult response;
+	::sum::SumOperand request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
 	bool done;
 };
 
-class FibonacciClient
+class SumClient
 {
 public:
-	explicit FibonacciClient(std::shared_ptr<grpc::Channel> channel) 
-		: stub(::fibonacci::FibonacciSlowService::NewStub(channel))
+	explicit SumClient(std::shared_ptr<grpc::Channel> channel) 
+		: stub(::sum::SumService::NewStub(channel))
 	{
 	}
 
-	std::vector<unsigned long long> Calculate(uint64_t number) 
+	int ComputeSum(int op1, int op2)
 	{
-		this->reactor = std::make_unique<FibonacciClientReactor>(this->stub.get(), number);
-		std::vector<unsigned long long> fibonacci_list;
-
-		grpc::Status status = this->reactor->Await(fibonacci_list);
-
+		SumClientReactor reactor(this->stub.get(), op1, op2);
+		int result;
+		grpc::Status status = reactor.Await(result);
 		if (!status.ok())
-		{
-			std::stringstream ss;
-			ss << status.error_message() << " (" << status.error_code() << ")";
-			throw std::runtime_error(ss.str());
-		}
-
-		return fibonacci_list;
-	}
-
-	void Cancel()
-	{
-		if (this->reactor)
-		{
-			this->reactor->Cancel();
-		}
+			throw std::runtime_error(status.error_message());
+		
+		return result;
 	}
 
 private:
-	std::unique_ptr<::fibonacci::FibonacciSlowService::Stub> stub;
-	std::unique_ptr<FibonacciClientReactor> reactor;
+	std::unique_ptr<sum::SumService::Stub> stub;
 };
 
 int main(int argc, char** argv) 
 {
-	if (argc != 3)
+	if (argc != 4)
 	{
-		std::cerr << "Usage: ./client <port> <limit>" << std::endl;
+		std::cerr << "Usage: ./client <port> <op1> <op2>" << std::endl;
 		return 1001;
 	}
 
-	int port;
-	uint64_t number;
-	std::shared_ptr<grpc::Channel> channel;
-	std::unique_ptr<FibonacciClient> client;
-
 	try
 	{
-		port = std::stoi(argv[1]);
-		number = std::stoull(argv[2]);
-
+		int port = std::stoi(argv[1]);
+		int op1 = std::stoi(argv[2]);
+		int op2 = std::stoi(argv[3]);
 		std::string host = absl::StrFormat("localhost:%d", port);
-		channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
-		client = std::make_unique<FibonacciClient>(channel);
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		return 1002;
-	}
-
-	// Start the cancellation thread in main
-	std::thread cancel_thread([&client]()
-	{
-		std::cout << "Press 'c' to cancel the request..." << std::endl;
-		char c;
-		std::cin >> c;
-		if (c == 'c')
-		{
-			client->Cancel();
-			std::cout << "Client sent cancellation request!" << std::endl;
-		}
-	});
-
-	try
-	{
-		std::vector<unsigned long long> sequence = client->Calculate(number);
-
-		for (auto&& val : sequence)
-		{
-			std::cout << val << " ";
-		}
-		std::cout << std::endl;
+		auto channel_args = grpc::ChannelArguments();
+		channel_args.SetServiceConfigJSON(std::string(kRetryPolicy));
+		auto channel = grpc::CreateCustomChannel(host, grpc::InsecureChannelCredentials(), channel_args);
+		SumClient client(channel);
+		int result = client.ComputeSum(op1, op2);	
+		std::cout << op1 << " + " << op2 << " = " << result << std::endl;
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
 	}
-
-	cancel_thread.join();
 
 	return 0;
 }
