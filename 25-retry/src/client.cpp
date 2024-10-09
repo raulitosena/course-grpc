@@ -5,6 +5,8 @@
 #include <condition_variable>
 #include <thread>
 #include <chrono>
+#include "json.hpp"
+#include <fstream>
 
 
 constexpr std::string_view kRetryPolicy =
@@ -83,6 +85,21 @@ private:
 
 int main(int argc, char** argv) 
 {
+	std::string config_policy;
+
+	try
+	{
+		std::ifstream file("policy.json");
+		nlohmann::json j = nlohmann::json::parse(file);
+		config_policy = j.dump();
+		std::cout << config_policy << std::endl;
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << "Could not load service policy. ERROR: " << e.what() << '\n';
+		return 1000;
+	}
+
 	if (argc != 4)
 	{
 		std::cerr << "Usage: ./client <port> <op1> <op2>" << std::endl;
@@ -96,7 +113,7 @@ int main(int argc, char** argv)
 		int op2 = std::stoi(argv[3]);
 		std::string host = absl::StrFormat("localhost:%d", port);
 		auto channel_args = grpc::ChannelArguments();
-		channel_args.SetServiceConfigJSON(std::string(kRetryPolicy));
+		channel_args.SetServiceConfigJSON(config_policy);
 		auto channel = grpc::CreateCustomChannel(host, grpc::InsecureChannelCredentials(), channel_args);
 		SumClient client(channel);
 		int result = client.ComputeSum(op1, op2);	
