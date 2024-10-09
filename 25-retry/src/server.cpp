@@ -3,7 +3,6 @@
 #include <proto/sum.grpc.pb.h>
 
 
-
 class SumServiceImpl : public ::sum::SumService::CallbackService
 {
 public:

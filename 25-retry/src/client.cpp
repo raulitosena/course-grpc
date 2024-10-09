@@ -3,24 +3,9 @@
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
-#include <thread>
-#include <chrono>
 #include "json.hpp"
 #include <fstream>
 
-
-constexpr std::string_view kRetryPolicy =
-	"{\"methodConfig\" : [{"
-	"   \"name\" : [{\"service\": \"helloworld.Greeter\"}],"
-	"   \"waitForReady\": true,"
-	"   \"retryPolicy\": {"
-	"     \"maxAttempts\": 4,"
-	"     \"initialBackoff\": \"1s\","
-	"     \"maxBackoff\": \"120s\","
-	"     \"backoffMultiplier\": 1.0,"
-	"     \"retryableStatusCodes\": [\"UNAVAILABLE\"]"
-	"    }"
-	"}]}";
 
 class SumClientReactor : public grpc::ClientUnaryReactor
 {
