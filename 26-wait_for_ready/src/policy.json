@@ -1,0 +1,9 @@
+{
+	"methodConfig": 
+	[
+		{
+			"name": [{"service": "sum.SumService"}],
+			"waitForReady": true
+		}
+	]
+}
