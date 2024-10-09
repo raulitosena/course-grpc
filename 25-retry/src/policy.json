@@ -1,11 +1,16 @@
 {
-	"waitForReady": true,
-	"retryPolicy": 
-	{
-		"maxAttempts": 60,
-		"initialBackoff": "1s",
-		"maxBackoff": "60s",
-		"backoffMultiplier": 1,
-		"retryableStatusCodes": [ "UNAVAILABLE" ]
-	}
+	"methodConfig": 
+	[
+		{
+			"name": [{"service": "sum.SumService"}],
+			"retryPolicy": 
+			{
+				"maxAttempts": 5,
+				"initialBackoff": "1s",
+				"maxBackoff": "100s",
+				"backoffMultiplier": 2,
+				"retryableStatusCodes": [ "UNAVAILABLE" ]
+			}
+		}
+	]
 }
