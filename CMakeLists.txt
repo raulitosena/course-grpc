@@ -23,7 +23,6 @@ add_subdirectory(09-evens-callback)
 
 # gRPC features
 add_subdirectory(20-errors)
-add_subdirectory(21-deadline)
 add_subdirectory(22-interceptor)
 add_subdirectory(23-multiplex)
 add_subdirectory(24-cancel)
