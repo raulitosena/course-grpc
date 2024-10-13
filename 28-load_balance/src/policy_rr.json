@@ -1,0 +1,3 @@
+{
+	"loadBalancingPolicy": "round_robin"
+}

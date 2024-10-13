@@ -3,6 +3,7 @@ FROM ubuntu:latest
 # Install necessary packages
 RUN apt update && apt install -y cmake build-essential gdb git git-flow autoconf libtool pkg-config valgrind sudo
 RUN apt install -y net-tools
+
 # Set ubuntu password
 RUN echo 'ubuntu:ubuntu' | chpasswd
 

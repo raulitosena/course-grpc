@@ -60,7 +60,7 @@ class FibonacciSlowServiceRpc : public ::fibonacci::FibonacciSlowService::Callba
 public:
 	FibonacciSlowServiceRpc(unsigned short port)
 	{
-		this->host = absl::StrFormat("localhost:%d", port);
+		this->host = absl::StrFormat("0.0.0.0:%d", port);
 	}
 
 	void Run()

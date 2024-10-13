@@ -101,44 +101,22 @@ int main(int argc, char** argv)
 
 	if (argc != 3)
 	{
-		std::cerr << "Usage: ./client <port> <limit>" << std::endl;
+		std::cerr << "Usage: ./client <host:port> <limit>" << std::endl;
 		return 1001;
 	}
 
-	int port;
+	std::string host;
 	uint64_t number;
+	grpc::ChannelArguments channel_args;
 	std::shared_ptr<grpc::Channel> channel;
 	std::unique_ptr<FibonacciClient> client;
 
 	try
 	{
-		port = std::stoi(argv[1]);
+		host = absl::StrFormat("%s", argv[1]);
 		number = std::stoull(argv[2]);
-		
-		std::string host = absl::StrFormat("localhost:%d", port);
-
-		
-
-		// //std::string server_list = "localhost:6000,localhost:6001";
-		// //std::string server_list = "dns:///localhost:6000,localhost:6001";
-		// //std::string server_list = "dns:///localhost:6000;localhost:6001";
-		// std::string server_list = "dns:///localhost:6000,dns:///localhost:6001";
-
-		// //std::string server_list = host;
-
-		// grpc::ChannelArguments channel_args = grpc::ChannelArguments();
-		// channel_args.SetServiceConfigJSON(config_policy);
-
-
-		//std::string server_address = "dns:///localhost:6000,localhost:6001";
-		std::string server_address = "127.0.0.1:6000,127.0.0.2:6001";
-
-		grpc::ChannelArguments channel_args;
-		channel_args.SetLoadBalancingPolicyName("round_robin");
-
-		auto channel = grpc::CreateCustomChannel(server_address, grpc::InsecureChannelCredentials(), channel_args);
-
-		//channel = grpc::CreateCustomChannel(server_list, grpc::InsecureChannelCredentials(), channel_args);
+		channel_args.SetServiceConfigJSON(config_policy);
+		channel = grpc::CreateCustomChannel(host, grpc::InsecureChannelCredentials(), channel_args);
 		client = std::make_unique<FibonacciClient>(channel);
 	}
 	catch(const std::exception& e)
