@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 # Install necessary packages
 RUN apt update && apt install -y cmake build-essential gdb git git-flow autoconf libtool pkg-config valgrind sudo
-RUN apt install -y net-tools
+
 # Set ubuntu password
 RUN echo 'ubuntu:ubuntu' | chpasswd
 
@@ -22,5 +22,9 @@ RUN rm -rf /home/ubuntu/grpc_sources
 RUN rm -rf /home/ubuntu/grpc_build
 ENV PATH="$INSTALL_DIR/bin:$PATH"
 
+USER root
+RUN apt install -y net-tools
+
+USER ubuntu
 WORKDIR /home/ubuntu
 RUN ln -s /workspaces workspaces

@@ -72,20 +72,15 @@ int main(int argc, char** argv)
 {
 	if (argc != 4)
 	{
-		std::cerr << "Usage: ./client <port> <op1> <op2>" << std::endl;
+		std::cerr << "Usage: ./client <host:port> <op1> <op2>" << std::endl;
 		return 1001;
 	}
 
-	int port = std::stoi(argv[1]);
+	std::string host = absl::StrFormat("%s", argv[1]);
 	int op1 = std::stoi(argv[2]);
 	int op2 = std::stoi(argv[3]);
-	std::string host = absl::StrFormat("localhost:%d", port);
 
-	grpc::ChannelArguments args = grpc::ChannelArguments();
-	args.SetInt(GRPC_ARG_KEEPALIVE_TIME_MS, 20 * 1000 /*20 sec*/);
-	args.SetInt(GRPC_ARG_KEEPALIVE_TIMEOUT_MS, 10 * 1000 /*10 sec*/);
-	args.SetInt(GRPC_ARG_KEEPALIVE_PERMIT_WITHOUT_CALLS, 1);
-	std::shared_ptr<grpc::Channel> channel = grpc::CreateCustomChannel(host, grpc::InsecureChannelCredentials(), args);
+	std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
 	SumClient client(channel);
 
 	std::thread client_thread([&client, op1, op2]()

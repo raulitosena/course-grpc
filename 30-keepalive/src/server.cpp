@@ -26,7 +26,7 @@ class SumServer
 public:
 	SumServer(unsigned short port)
 	{
-		this->host = absl::StrFormat("localhost:%d", port);
+		this->host = absl::StrFormat("0.0.0.0:%d", port);
 	}
 
 	virtual ~SumServer()
@@ -41,10 +41,9 @@ public:
 
 		this->builder.AddListeningPort(this->host, grpc::InsecureServerCredentials());
 		this->builder.RegisterService(&this->service);
-		builder.AddChannelArgument(GRPC_ARG_KEEPALIVE_TIME_MS, 10 * 60 * 1000 /*10 min*/);
+		builder.AddChannelArgument(GRPC_ARG_KEEPALIVE_TIME_MS, 1 * 60 * 1000 /*1 min*/);
 		builder.AddChannelArgument(GRPC_ARG_KEEPALIVE_TIMEOUT_MS, 20 * 1000 /*20 sec*/);
 		builder.AddChannelArgument(GRPC_ARG_KEEPALIVE_PERMIT_WITHOUT_CALLS, 1);
-		builder.AddChannelArgument(GRPC_ARG_HTTP2_MIN_RECV_PING_INTERVAL_WITHOUT_DATA_MS, 10 * 1000 /*10 sec*/);
 		this->server = this->builder.BuildAndStart();
 		std::cout << "Server running on " << this->host << " ..." << std::endl;
 	}
