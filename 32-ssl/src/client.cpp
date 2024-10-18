@@ -96,24 +96,22 @@ int main(int argc, char** argv)
 
 	std::string host = argv[1];
 	std::string file_path = argv[2];
-
-	grpc::ChannelArguments args;
-	grpc::SslCredentialsOptions ssl_options;
 	std::shared_ptr<grpc::Channel> channel;
-	std::shared_ptr<grpc::ChannelCredentials> credentials;
 
 	try
 	{
+		// Compression
+		grpc::ChannelArguments args;
 		args.SetCompressionAlgorithm(GRPC_COMPRESS_GZIP);
 
+		// Authentication
 		grpc::SslCredentialsOptions ssl_opts;
-		ssl_opts.pem_root_certs = ReadFile("root.crt");   // Root CA certificate
-		ssl_opts.pem_private_key = ReadFile("client.key"); // Client's private key
-		ssl_opts.pem_cert_chain = ReadFile("client.crt");  // Client's certificate
+		ssl_opts.pem_root_certs = ReadFile("pki/root.crt");		// Root CA certificate
+		ssl_opts.pem_private_key = ReadFile("pki/client.key");	// Client's private key
+		ssl_opts.pem_cert_chain = ReadFile("pki/client.crt");	// Client's certificate
+		std::shared_ptr<grpc::ChannelCredentials> credentials = grpc::SslCredentials(ssl_opts);
 
-		auto ssl_creds = grpc::SslCredentials(ssl_opts);
-
-		channel = grpc::CreateCustomChannel(host, ssl_creds, args);
+		channel = grpc::CreateCustomChannel(host, credentials, args);
 	}
 	catch(const std::exception& e)
 	{

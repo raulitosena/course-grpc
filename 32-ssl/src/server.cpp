@@ -92,27 +92,17 @@ public:
 		if (this->server)
 			return;
 
-
 		grpc::SslServerCredentialsOptions::PemKeyCertPair key_cert_pair = {
-			ReadFile("server.key"),  // Server's private key
-			ReadFile("server.crt")   // Server's certificate
+			ReadFile("pki/server.key"),  // Server's private key
+			ReadFile("pki/server.crt")   // Server's certificate
 		};
-
 		grpc::SslServerCredentialsOptions ssl_opts;
-		ssl_opts.pem_root_certs = ReadFile("root.crt");  // Root CA certificate
+		ssl_opts.pem_root_certs = ReadFile("pki/root.crt");  // Root CA certificate
 		ssl_opts.pem_key_cert_pairs.push_back(key_cert_pair);
+		std::shared_ptr<grpc::ServerCredentials> credentials = grpc::SslServerCredentials(ssl_opts);
 
-		this->builder.AddListeningPort(this->host, grpc::SslServerCredentials(ssl_opts));
+		this->builder.AddListeningPort(this->host, credentials);
 		this->builder.RegisterService(&this->service);
-
-		// grpc::SslServerCredentialsOptions::PemKeyCertPair server_pair;]
-		// server_pair.cert_chain = ReadFile("credentials/localhost.crt");
-		// server_pair.private_key = ReadFile("credentials/localhost.key");
-		// grpc::SslServerCredentialsOptions ssl_options;
-		// ssl_options.pem_key_cert_pairs.emplace_back(server_pair);
-
-		// this->builder.AddListeningPort(this->host, grpc::SslServerCredentials(ssl_options));
-
 
 		this->server = this->builder.BuildAndStart();
 		std::cout << "Server running on " << this->host << " ..." << std::endl;
