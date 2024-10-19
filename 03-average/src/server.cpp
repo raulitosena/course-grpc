@@ -4,10 +4,10 @@
 #include <proto/average.grpc.pb.h>
 
 
-class AverageServiceRpc : public average::AverageService::Service
+class AverageServiceImpl : public average::AverageService::Service
 {
 public:
-	AverageServiceRpc(unsigned short port)
+	AverageServiceImpl(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		AverageServiceRpc service(port);
+		AverageServiceImpl service(port);
 		service.Run();
 	} 
 	catch (const std::exception& e)

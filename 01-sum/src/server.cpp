@@ -3,10 +3,10 @@
 #include <proto/sum.pb.h>
 #include <proto/sum.grpc.pb.h>
 
-class SumServiceRpc : public sum::SumService::Service
+class SumServiceImpl : public sum::SumService::Service
 {
 public:
-	SumServiceRpc(unsigned short port)
+	SumServiceImpl(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		SumServiceRpc sumService(port);
+		SumServiceImpl sumService(port);
 		sumService.Run();
 	} 
 	catch (const std::exception& e)

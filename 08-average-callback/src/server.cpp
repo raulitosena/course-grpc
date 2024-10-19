@@ -51,10 +51,10 @@ private:
 	float accumulator = 0.0f;
 };
 
-class AverageServiceRpc : public average::AverageService::CallbackService
+class AverageServiceImpl : public average::AverageService::CallbackService
 {
 public:
-	AverageServiceRpc(unsigned short port)
+	AverageServiceImpl(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		AverageServiceRpc service(port);
+		AverageServiceImpl service(port);
 		service.Run();
 	} 
 	catch (const std::exception& e)

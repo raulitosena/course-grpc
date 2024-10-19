@@ -78,10 +78,10 @@ private:
 	std::queue<evens::Number> buffer;
 };
 
-class EvensServiceRpc : public evens::EvensService::CallbackService
+class EvensServiceImpl : public evens::EvensService::CallbackService
 {
 public:
-	EvensServiceRpc(unsigned short port)
+	EvensServiceImpl(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		EvensServiceRpc service(port);
+		EvensServiceImpl service(port);
 		service.Run();
 	}
 	catch (const std::exception& e)

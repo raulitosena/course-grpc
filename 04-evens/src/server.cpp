@@ -4,10 +4,10 @@
 #include <proto/evens.grpc.pb.h>
 
 
-class EvensServiceRpc : public evens::EvensService::Service
+class EvensServiceImpl : public evens::EvensService::Service
 {
 public:
-	EvensServiceRpc(unsigned short port)
+	EvensServiceImpl(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		EvensServiceRpc service(port);
+		EvensServiceImpl service(port);
 		service.Run();
 	} 
 	catch (const std::exception& e)

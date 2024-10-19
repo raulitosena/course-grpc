@@ -75,15 +75,15 @@ private:
 	CallStatus status; 
 };
 
-class SumServiceRpc : public sum::SumService::Service
+class SumServiceImpl : public sum::SumService::Service
 {
 public:
-	SumServiceRpc(unsigned short port)
+	SumServiceImpl(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
 
-	virtual ~SumServiceRpc()
+	virtual ~SumServiceImpl()
 	{
 		this->Stop();		
 	}
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		SumServiceRpc service(port);
+		SumServiceImpl service(port);
 		service.Start();
 	} 
 	catch (const std::exception& e)

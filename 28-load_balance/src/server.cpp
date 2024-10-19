@@ -55,10 +55,10 @@ private:
 	}
 };
 
-class FibonacciSlowServiceRpc : public ::fibonacci::FibonacciSlowService::CallbackService
+class FibonacciSlowServiceImpl : public ::fibonacci::FibonacciSlowService::CallbackService
 {
 public:
-	FibonacciSlowServiceRpc(unsigned short port)
+	FibonacciSlowServiceImpl(unsigned short port)
 	{
 		this->host = absl::StrFormat("0.0.0.0:%d", port);
 	}
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		FibonacciSlowServiceRpc service(port);
+		FibonacciSlowServiceImpl service(port);
 		service.Run();
 	} 
 	catch (const std::exception& e)

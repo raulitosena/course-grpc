@@ -33,10 +33,10 @@ std::vector<uint32_t> GenerateFibonacci(uint32_t limit)
 	return sequence;
 }
 
-class FibonacciServiceRpc : public fibonacci::FibonacciService::Service
+class FibonacciServiceImpl : public fibonacci::FibonacciService::Service
 {
 public:
-	FibonacciServiceRpc(unsigned short port)
+	FibonacciServiceImpl(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		FibonacciServiceRpc service(port);
+		FibonacciServiceImpl service(port);
 		service.Run();
 	} 
 	catch (const std::exception& e)

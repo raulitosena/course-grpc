@@ -70,10 +70,10 @@ private:
 	std::vector<fibonacci::FibonacciResponse>::iterator current_response;
 };
 
-class FibonacciServiceRpc : public fibonacci::FibonacciService::CallbackService
+class FibonacciServiceImpl : public fibonacci::FibonacciService::CallbackService
 {
 public:
-	FibonacciServiceRpc(unsigned short port)
+	FibonacciServiceImpl(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		FibonacciServiceRpc service(port);
+		FibonacciServiceImpl service(port);
 		service.Run();
 	} 
 	catch (const std::exception& e)

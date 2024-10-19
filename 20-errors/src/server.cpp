@@ -34,10 +34,10 @@ private:
 	}
 };
 
-class SqrtServiceRpc : public ::math::SqrtService::CallbackService
+class SqrtServiceImpl : public ::math::SqrtService::CallbackService
 {
 public:
-	SqrtServiceRpc(unsigned short port)
+	SqrtServiceImpl(unsigned short port)
 	{
 		this->host = absl::StrFormat("localhost:%d", port);
 	}
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 	try
 	{
 		int port = std::stoi(argv[1]);
-		SqrtServiceRpc service(port);
+		SqrtServiceImpl service(port);
 		service.Run();
 	} 
 	catch (const std::exception& e)
