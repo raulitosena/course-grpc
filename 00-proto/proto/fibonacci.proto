@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package fibonacci;
+
+message FibonacciRequest
+{
+	uint64 number = 1;
+}
+
+message FibonacciResponse
+{
+	uint64 number = 1;
+}
+
+service FibonacciService
+{
+	rpc GetFibonaccisStream(FibonacciRequest) returns (stream FibonacciResponse) {}
+}
+
+message FibonacciListResponse
+{
+	repeated uint64 number = 1;
+}
+
+service FibonacciSlowService
+{
+	rpc GetFibonacciList (FibonacciRequest) returns (FibonacciListResponse) {}
+}

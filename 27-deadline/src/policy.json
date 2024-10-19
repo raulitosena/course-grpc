@@ -1,0 +1,9 @@
+{
+	"methodConfig": 
+	[
+		{
+			"name": [{"service": "fibonacci.FibonacciSlowService"}],
+			"timeout": "20s"
+		}
+	]
+}
