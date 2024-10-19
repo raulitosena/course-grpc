@@ -86,15 +86,14 @@ int main(int argc, char** argv)
 {
 	if (argc != 3)
 	{
-		std::cerr << "Usage: ./client <port> <limit>" << std::endl;
+		std::cerr << "Usage: ./client <host:port> <limit>" << std::endl;
 		return 1001;
 	}
 
 	try
 	{
-		int port = std::stoi(argv[1]);
+		std::string host = argv[1];
 		uint32_t limit = std::stoul(argv[2]);
-		std::string host = absl::StrFormat("localhost:%d", port);
 
 		std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials());
 		FibonacciClient client(channel);
