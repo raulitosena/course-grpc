@@ -25,6 +25,11 @@ ENV PATH="$INSTALL_DIR/bin:$PATH"
 USER root
 RUN apt install -y net-tools
 
+RUN apt install wget
+RUN wget https://github.com/fullstorydev/grpcurl/releases/download/v1.9.1/grpcurl_1.9.1_linux_amd64.deb
+RUN dpkg -i grpcurl_1.9.1_linux_amd64.deb
+RUN rm grpcurl_1.9.1_linux_amd64.deb
+
 USER ubuntu
 WORKDIR /home/ubuntu
 RUN ln -s /workspaces workspaces
