@@ -1,6 +1,6 @@
 #include <iostream>
 #include <grpcpp/grpcpp.h>
-#include <proto/sqrt.grpc.pb.h>
+#include <proto/math.grpc.pb.h>
 #include <cmath>
 
 

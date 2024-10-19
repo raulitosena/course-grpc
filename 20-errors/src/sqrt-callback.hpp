@@ -1,4 +1,4 @@
-#include <proto/sqrt.grpc.pb.h>
+#include <proto/math.grpc.pb.h>
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
