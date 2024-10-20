@@ -1,7 +1,7 @@
 
-project(33-reflection)
+project(34-reflection)
 
-set (SERVER_NAME "server-33")
+set (SERVER_NAME "server-34")
 
 set(BUILD_DIR ${GRPC_DIR}/build/${CMAKE_BUILD_TYPE}/${PROJECT_NAME})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_DIR})

@@ -1,8 +1,8 @@
 
-project(32-ssl)
+project(31-metadata)
 
-set (SERVER_NAME "server-32")
-set (CLIENT_NAME "client-32")
+set (SERVER_NAME "server-31")
+set (CLIENT_NAME "client-31")
 
 set(BUILD_DIR ${GRPC_DIR}/build/${CMAKE_BUILD_TYPE}/${PROJECT_NAME})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_DIR})
