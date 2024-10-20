@@ -46,7 +46,7 @@ public:
 private:
 	void OnDone() override 
 	{
-		std::cerr << "RPC done!" << std::endl;
+		std::cout << "RPC done!" << std::endl;
 		delete this;
 	}
 
