@@ -2,7 +2,32 @@
 #include <grpcpp/grpcpp.h>
 #include <proto/fibonacci.grpc.pb.h>
 #include <vector>
+#include <chrono>
+#include <string>
 
+
+void printMetadata(const std::multimap<grpc::string_ref, grpc::string_ref> metadata)
+{
+	for (auto iter = metadata.begin(); iter != metadata.end(); ++iter)
+	{
+		std::cout << " - Header key: " << iter->first << ", value: ";
+		size_t isbin = iter->first.find("-bin");
+		if ((isbin != std::string::npos) && (isbin + 4 == iter->first.size()))
+		{
+			std::cout << std::hex;
+			for (auto c : iter->second)
+			{
+				std::cout << static_cast<unsigned int>(c);
+			}
+			std::cout << std::dec;
+		}
+		else
+		{
+			std::cout << iter->second;
+		}
+		std::cout << std::endl;
+	}
+}
 
 unsigned long long getFibonacci(unsigned long long n)
 {
@@ -10,7 +35,6 @@ unsigned long long getFibonacci(unsigned long long n)
 	{
 		return n;
 	}
-	
 	return getFibonacci(n - 1) + getFibonacci(n - 2);
 }
 
@@ -19,6 +43,15 @@ class FibonacciServerSlowReactor : public grpc::ServerUnaryReactor
 public:
 	FibonacciServerSlowReactor(grpc::CallbackServerContext* context, const ::fibonacci::FibonacciRequest& request, ::fibonacci::FibonacciListResponse* response) 
 	{
+		// Get the client's initial metadata
+		std::cout << "Client user-defined metadata: " << std::endl;
+		const std::multimap<grpc::string_ref, grpc::string_ref> metadata = context->client_metadata();
+
+		printMetadata(metadata);
+
+		auto request_id = metadata.find("request-id");
+
+		// Process Fibonacci request
 		uint64_t number = request.number();
 		std::vector<unsigned long long> fibonacci_list;
 
@@ -27,10 +60,17 @@ public:
 			fibonacci_list.push_back(getFibonacci(i));
 		}
 		
-		for (auto &&num : fibonacci_list)
+		for (auto&& num : fibonacci_list)
 		{
 			response->add_number(num);
 		}
+
+		// Add server response metadata
+		auto now = std::chrono::system_clock::now();
+		auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+		context->AddInitialMetadata("response-timestamp", std::to_string(millis));
+		context->AddInitialMetadata("server-id", "server-12345");
+		context->AddInitialMetadata("request-id", std::string(request_id->second.data(), request_id->second.size()) );
 
 		this->Finish(grpc::Status::OK);
 	}
@@ -38,7 +78,6 @@ public:
 private:
 	void OnDone() override 
 	{
-		std::cerr << "RPC done!" << std::endl;
 		delete this;
 	}
 
@@ -53,12 +92,16 @@ class FibonacciSlowServiceImpl : public ::fibonacci::FibonacciSlowService::Callb
 public:
 	FibonacciSlowServiceImpl(unsigned short port)
 	{
-		this->host = absl::StrFormat("localhost:%d", port);
+		this->host = absl::StrFormat("0.0.0.0:%d", port);
 	}
 
 	void Run()
 	{
 		grpc::ServerBuilder builder;
+		// Metadata SOFT limit		
+		// builder.AddChannelArgument(GRPC_ARG_MAX_METADATA_SIZE, 787);
+		// Metadata HARD limit
+		// builder.AddChannelArgument(GRPC_ARG_ABSOLUTE_MAX_METADATA_SIZE, 789);
 		builder.AddListeningPort(this->host, grpc::InsecureServerCredentials());
 		builder.RegisterService(this);
 		std::shared_ptr<grpc::Server> server = builder.BuildAndStart();
