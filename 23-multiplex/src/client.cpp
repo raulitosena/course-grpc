@@ -10,7 +10,7 @@
 class Reactor2x : public grpc::ClientUnaryReactor
 {
 public:
-	Reactor2x(::math::MathService::Stub* stub, const int32_t& number)
+	Reactor2x(math::MathService::Stub* stub, const int32_t& number)
 		: done(false)
 	{
 		this->request.set_number(number);
@@ -36,8 +36,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::math::ResultResponse response;
-	::math::OperandRequest request;
+	math::ResultResponse response;
+	math::OperandRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -47,7 +47,7 @@ private:
 class Client2x
 {
 public:
-	explicit Client2x(std::shared_ptr<grpc::Channel> channel) : stub(::math::MathService::NewStub(channel))
+	explicit Client2x(std::shared_ptr<grpc::Channel> channel) : stub(math::MathService::NewStub(channel))
 	{
 	}
 
@@ -68,13 +68,13 @@ public:
 	}
 
 private:
-	std::unique_ptr<::math::MathService::Stub> stub;
+	std::unique_ptr<math::MathService::Stub> stub;
 };
 
 class Reactor3x : public grpc::ClientUnaryReactor
 {
 public:
-	Reactor3x(::math::MathService::Stub* stub, const int32_t& number)
+	Reactor3x(math::MathService::Stub* stub, const int32_t& number)
 		: done(false)
 	{
 		this->request.set_number(number);
@@ -100,8 +100,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::math::ResultResponse response;
-	::math::OperandRequest request;
+	math::ResultResponse response;
+	math::OperandRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -111,7 +111,7 @@ private:
 class Client3x
 {
 public:
-	explicit Client3x(std::shared_ptr<grpc::Channel> channel) : stub(::math::MathService::NewStub(channel))
+	explicit Client3x(std::shared_ptr<grpc::Channel> channel) : stub(math::MathService::NewStub(channel))
 	{
 	}
 
@@ -132,13 +132,13 @@ public:
 	}
 
 private:
-	std::unique_ptr<::math::MathService::Stub> stub;
+	std::unique_ptr<math::MathService::Stub> stub;
 };
 
 class Reactor4x : public grpc::ClientUnaryReactor
 {
 public:
-	Reactor4x(::math::MathService::Stub* stub, const int32_t& number)
+	Reactor4x(math::MathService::Stub* stub, const int32_t& number)
 		: done(false)
 	{
 		this->request.set_number(number);
@@ -164,8 +164,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::math::ResultResponse response;
-	::math::OperandRequest request;
+	math::ResultResponse response;
+	math::OperandRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -175,7 +175,7 @@ private:
 class Client4x
 {
 public:
-	explicit Client4x(std::shared_ptr<grpc::Channel> channel) : stub(::math::MathService::NewStub(channel))
+	explicit Client4x(std::shared_ptr<grpc::Channel> channel) : stub(math::MathService::NewStub(channel))
 	{
 	}
 
@@ -196,13 +196,13 @@ public:
 	}
 
 private:
-	std::unique_ptr<::math::MathService::Stub> stub;
+	std::unique_ptr<math::MathService::Stub> stub;
 };
 
 class Reactor5x : public grpc::ClientUnaryReactor
 {
 public:
-	Reactor5x(::math::MathService::Stub* stub, const int32_t& number)
+	Reactor5x(math::MathService::Stub* stub, const int32_t& number)
 		: done(false)
 	{
 		this->request.set_number(number);
@@ -228,8 +228,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::math::ResultResponse response;
-	::math::OperandRequest request;
+	math::ResultResponse response;
+	math::OperandRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -239,7 +239,7 @@ private:
 class Client5x
 {
 public:
-	explicit Client5x(std::shared_ptr<grpc::Channel> channel) : stub(::math::MathService::NewStub(channel))
+	explicit Client5x(std::shared_ptr<grpc::Channel> channel) : stub(math::MathService::NewStub(channel))
 	{
 	}
 
@@ -260,13 +260,13 @@ public:
 	}
 
 private:
-	std::unique_ptr<::math::MathService::Stub> stub;
+	std::unique_ptr<math::MathService::Stub> stub;
 };
 
 class Reactor6x : public grpc::ClientUnaryReactor
 {
 public:
-	Reactor6x(::math::MathService::Stub* stub, const int32_t& number)
+	Reactor6x(math::MathService::Stub* stub, const int32_t& number)
 		: done(false)
 	{
 		this->request.set_number(number);
@@ -292,8 +292,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::math::ResultResponse response;
-	::math::OperandRequest request;
+	math::ResultResponse response;
+	math::OperandRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -303,7 +303,7 @@ private:
 class Client6x
 {
 public:
-	explicit Client6x(std::shared_ptr<grpc::Channel> channel) : stub(::math::MathService::NewStub(channel))
+	explicit Client6x(std::shared_ptr<grpc::Channel> channel) : stub(math::MathService::NewStub(channel))
 	{
 	}
 
@@ -324,13 +324,13 @@ public:
 	}
 
 private:
-	std::unique_ptr<::math::MathService::Stub> stub;
+	std::unique_ptr<math::MathService::Stub> stub;
 };
 
 class Reactor7x : public grpc::ClientUnaryReactor
 {
 public:
-	Reactor7x(::math::MathService::Stub* stub, const int32_t& number)
+	Reactor7x(math::MathService::Stub* stub, const int32_t& number)
 		: done(false)
 	{
 		this->request.set_number(number);
@@ -356,8 +356,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::math::ResultResponse response;
-	::math::OperandRequest request;
+	math::ResultResponse response;
+	math::OperandRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -367,7 +367,7 @@ private:
 class Client7x
 {
 public:
-	explicit Client7x(std::shared_ptr<grpc::Channel> channel) : stub(::math::MathService::NewStub(channel))
+	explicit Client7x(std::shared_ptr<grpc::Channel> channel) : stub(math::MathService::NewStub(channel))
 	{
 	}
 
@@ -388,13 +388,13 @@ public:
 	}
 
 private:
-	std::unique_ptr<::math::MathService::Stub> stub;
+	std::unique_ptr<math::MathService::Stub> stub;
 };
 
 class Reactor8x : public grpc::ClientUnaryReactor
 {
 public:
-	Reactor8x(::math::MathService::Stub* stub, const int32_t& number)
+	Reactor8x(math::MathService::Stub* stub, const int32_t& number)
 		: done(false)
 	{
 		this->request.set_number(number);
@@ -420,8 +420,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::math::ResultResponse response;
-	::math::OperandRequest request;
+	math::ResultResponse response;
+	math::OperandRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -431,7 +431,7 @@ private:
 class Client8x
 {
 public:
-	explicit Client8x(std::shared_ptr<grpc::Channel> channel) : stub(::math::MathService::NewStub(channel))
+	explicit Client8x(std::shared_ptr<grpc::Channel> channel) : stub(math::MathService::NewStub(channel))
 	{
 	}
 
@@ -452,13 +452,13 @@ public:
 	}
 
 private:
-	std::unique_ptr<::math::MathService::Stub> stub;
+	std::unique_ptr<math::MathService::Stub> stub;
 };
 
 class Reactor9x : public grpc::ClientUnaryReactor
 {
 public:
-	Reactor9x(::math::MathService::Stub* stub, const int32_t& number)
+	Reactor9x(math::MathService::Stub* stub, const int32_t& number)
 		: done(false)
 	{
 		this->request.set_number(number);
@@ -484,8 +484,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::math::ResultResponse response;
-	::math::OperandRequest request;
+	math::ResultResponse response;
+	math::OperandRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -495,7 +495,7 @@ private:
 class Client9x
 {
 public:
-	explicit Client9x(std::shared_ptr<grpc::Channel> channel) : stub(::math::MathService::NewStub(channel))
+	explicit Client9x(std::shared_ptr<grpc::Channel> channel) : stub(math::MathService::NewStub(channel))
 	{
 	}
 
@@ -516,7 +516,7 @@ public:
 	}
 
 private:
-	std::unique_ptr<::math::MathService::Stub> stub;
+	std::unique_ptr<math::MathService::Stub> stub;
 };
 
 int main(int argc, char** argv) 

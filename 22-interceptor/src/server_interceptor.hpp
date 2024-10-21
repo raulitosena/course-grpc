@@ -34,7 +34,7 @@ public:
 			std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 			std::cout << "Request received at: " << std::ctime(&now_time);
 
-			const auto* request = static_cast<const ::fibonacci::FibonacciRequest*>(methods->GetRecvMessage());
+			const auto* request = static_cast<const fibonacci::FibonacciRequest*>(methods->GetRecvMessage());
 			if (request) 
 				std::cout << "Request number received: " << request->number() << std::endl;
 		}

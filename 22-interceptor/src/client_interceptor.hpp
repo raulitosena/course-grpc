@@ -4,7 +4,7 @@
 #include <map>
 
 
-std::map<uint64_t, ::fibonacci::FibonacciListResponse> cache_;
+std::map<uint64_t, fibonacci::FibonacciListResponse> cache_;
 
 class CachingFiboInterceptor : public grpc::experimental::Interceptor
 {
@@ -38,12 +38,12 @@ public:
 		if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_SEND_INITIAL_METADATA))
 		{
 			hijack = true;
-			stub_ = ::fibonacci::FibonacciSlowService::NewStub(methods->GetInterceptedChannel());
+			stub_ = fibonacci::FibonacciSlowService::NewStub(methods->GetInterceptedChannel());
 		}
 
 		if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_SEND_MESSAGE))
 		{
-			const ::fibonacci::FibonacciRequest* req_msg = static_cast<const ::fibonacci::FibonacciRequest*>(methods->GetSendMessage());
+			const fibonacci::FibonacciRequest* req_msg = static_cast<const fibonacci::FibonacciRequest*>(methods->GetSendMessage());
 
 			if (req_msg)
 			{
@@ -60,7 +60,7 @@ public:
 				{
 					// Cache miss, forward request to server
 					std::cout << "Fibonacci for " << requested_number << " not found in cache. Sending request to server." << std::endl;
-					::fibonacci::FibonacciListResponse resp;
+					fibonacci::FibonacciListResponse resp;
 					grpc::ClientContext context;
 					grpc::Status status = stub_->GetFibonacciList(&context, *req_msg, &resp);
 
@@ -79,7 +79,7 @@ public:
 
 		if (methods->QueryInterceptionHookPoint(grpc::experimental::InterceptionHookPoints::PRE_RECV_MESSAGE))
 		{
-			::fibonacci::FibonacciListResponse* resp_msg = static_cast<::fibonacci::FibonacciListResponse*>(methods->GetRecvMessage());
+			fibonacci::FibonacciListResponse* resp_msg = static_cast<fibonacci::FibonacciListResponse*>(methods->GetRecvMessage());
 			*resp_msg = response_;
 		}
 
@@ -95,8 +95,8 @@ public:
 
 private:
 	grpc::ClientContext context_;
-	std::unique_ptr<::fibonacci::FibonacciSlowService::Stub> stub_;
-	::fibonacci::FibonacciListResponse response_;	
+	std::unique_ptr<fibonacci::FibonacciSlowService::Stub> stub_;
+	fibonacci::FibonacciListResponse response_;	
 };
 
 class CachingFiboInterceptorFactory : public grpc::experimental::ClientInterceptorFactoryInterface 

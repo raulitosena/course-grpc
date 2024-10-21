@@ -72,7 +72,7 @@ class FibonacciServiceImpl : public fibonacci::FibonacciService::CallbackService
 {
 public:
 	
-	grpc::ServerWriteReactor<fibonacci::FibonacciResponse>* GetFibonaccisStream(grpc::CallbackServerContext* context, const fibonacci::FibonacciRequest* request) override
+	grpc::ServerWriteReactor<fibonacci::FibonacciResponse>* GetFibonacciStream(grpc::CallbackServerContext* context, const fibonacci::FibonacciRequest* request) override
 	{
 		return new FibonacciWriterReactor(request);
 	}

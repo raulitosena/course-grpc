@@ -7,7 +7,7 @@
 class SqrtReactor : public grpc::ClientUnaryReactor
 {
 public:
-	SqrtReactor(::math::SqrtService::Stub* stub, const int& number)
+	SqrtReactor(math::SqrtService::Stub* stub, const int& number)
 		: done(false)
 	{
 		this->request.set_number(number);
@@ -33,8 +33,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::math::SqrtResponse response;
-	::math::SqrtRequest request;
+	math::SqrtResponse response;
+	math::SqrtRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -44,7 +44,7 @@ private:
 class SqrtClientWithReactor
 {
 public:
-	explicit SqrtClientWithReactor(std::shared_ptr<grpc::Channel> channel) : stub(::math::SqrtService::NewStub(channel))
+	explicit SqrtClientWithReactor(std::shared_ptr<grpc::Channel> channel) : stub(math::SqrtService::NewStub(channel))
 	{
 	}
 
@@ -66,5 +66,5 @@ public:
 	}
 
 private:
-	std::unique_ptr<::math::SqrtService::Stub> stub;
+	std::unique_ptr<math::SqrtService::Stub> stub;
 };

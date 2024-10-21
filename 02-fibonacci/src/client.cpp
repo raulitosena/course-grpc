@@ -17,7 +17,7 @@ public:
 		fibonacci::FibonacciResponse response;
 
 	 	request.set_number(num);
-		std::unique_ptr< grpc::ClientReader<fibonacci::FibonacciResponse> > reader(this->stub->GetFibonaccisStream(&context, request));
+		std::unique_ptr< grpc::ClientReader<fibonacci::FibonacciResponse> > reader(this->stub->GetFibonacciStream(&context, request));
 		std::vector<unsigned int> sequence;
 			
         while (reader->Read(&response))

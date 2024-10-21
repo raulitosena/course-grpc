@@ -59,7 +59,7 @@ public:
 		}
 	}
 
-	grpc::Status GetFibonaccisStream(grpc::ServerContext* context, const fibonacci::FibonacciRequest* request, grpc::ServerWriter<fibonacci::FibonacciResponse>* writer) override
+	grpc::Status GetFibonacciStream(grpc::ServerContext* context, const fibonacci::FibonacciRequest* request, grpc::ServerWriter<fibonacci::FibonacciResponse>* writer) override
 	{
 		unsigned int value = request->number();
 		std::cout << "Received on server: " << value << std::endl;

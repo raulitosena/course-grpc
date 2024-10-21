@@ -130,12 +130,12 @@ $ grpcurl --plaintext -emit-defaults -d '{ "number": "8" }' localhost:6000 fibon
 }
 ```
 
-## Calling an RPC Method with Streaming: `GetFibonaccisStream`
+## Calling an RPC Method with Streaming: `GetFibonacciStream`
 
 If the service uses streaming, gRPCurl can handle it as well. Here's how you invoke a streaming RPC:
 
 ```bash
-$ grpcurl --plaintext -emit-defaults -d '{ "number": "3" }' localhost:6000 fibonacci.FibonacciService/GetFibonaccisStream
+$ grpcurl --plaintext -emit-defaults -d '{ "number": "3" }' localhost:6000 fibonacci.FibonacciService/GetFibonacciStream
 {
   "number": "0"
 }

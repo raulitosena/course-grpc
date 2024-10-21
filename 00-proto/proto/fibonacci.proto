@@ -14,7 +14,7 @@ message FibonacciResponse
 
 service FibonacciService
 {
-	rpc GetFibonaccisStream(FibonacciRequest) returns (stream FibonacciResponse) {}
+	rpc GetFibonacciStream(FibonacciRequest) returns (stream FibonacciResponse) {}
 }
 
 message FibonacciListResponse

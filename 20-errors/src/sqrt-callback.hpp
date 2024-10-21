@@ -8,15 +8,15 @@ class SqrtClientWithCallback
 {
 public:
 	explicit SqrtClientWithCallback(std::shared_ptr<grpc::Channel> channel)
-		: stub(::math::SqrtService::NewStub(channel))
+		: stub(math::SqrtService::NewStub(channel))
 	{
 	}
 
 	double Calculate(int number) 
 	{
 		grpc::ClientContext context;
-		::math::SqrtRequest request;
-		::math::SqrtResponse response;
+		math::SqrtRequest request;
+		math::SqrtResponse response;
 		this->done = false;
 		request.set_number(number);
 		this->stub->async()->Calculate(&context, &request, &response, std::bind(&SqrtClientWithCallback::CalculateDone, this, std::placeholders::_1));
@@ -44,7 +44,7 @@ public:
 	}
 
 private:
-	std::unique_ptr<::math::SqrtService::Stub> stub;
+	std::unique_ptr<math::SqrtService::Stub> stub;
 	std::mutex mtx;
 	std::condition_variable cv;
 	bool done;

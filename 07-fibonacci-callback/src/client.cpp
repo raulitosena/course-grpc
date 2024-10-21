@@ -11,7 +11,7 @@ public:
 	FibonacciReaderReactor(fibonacci::FibonacciService::Stub* stub, const fibonacci::FibonacciRequest& request)
 		: done(false)
 	{
-		stub->async()->GetFibonaccisStream(&this->context, &request, this);
+		stub->async()->GetFibonacciStream(&this->context, &request, this);
 		this->StartCall();
 		this->StartRead(&this->response);
 	}

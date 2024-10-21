@@ -30,7 +30,7 @@ std::vector<unsigned long long> getFibonacciSequence(unsigned long long limit)
 class FibonacciServerSlowReactor : public grpc::ServerUnaryReactor 
 {
 public:
-	FibonacciServerSlowReactor(grpc::CallbackServerContext* context, const ::fibonacci::FibonacciRequest& request, ::fibonacci::FibonacciListResponse* response) 
+	FibonacciServerSlowReactor(grpc::CallbackServerContext* context, const fibonacci::FibonacciRequest& request, fibonacci::FibonacciListResponse* response) 
 	{
 		uint64_t number = request.number();
 		std::vector<unsigned long long> fibonacci_list = getFibonacciSequence(number);
@@ -56,7 +56,7 @@ private:
 	}
 };
 
-class FibonacciSlowServiceImpl : public ::fibonacci::FibonacciSlowService::CallbackService
+class FibonacciSlowServiceImpl : public fibonacci::FibonacciSlowService::CallbackService
 {
 public:
 	FibonacciSlowServiceImpl(unsigned short port)
@@ -89,7 +89,7 @@ public:
 		}
 	}
 
-	grpc::ServerUnaryReactor* GetFibonacciList(grpc::CallbackServerContext* context, const ::fibonacci::FibonacciRequest* request, ::fibonacci::FibonacciListResponse* response) override
+	grpc::ServerUnaryReactor* GetFibonacciList(grpc::CallbackServerContext* context, const fibonacci::FibonacciRequest* request, fibonacci::FibonacciListResponse* response) override
 	{
 		return new FibonacciServerSlowReactor(context, *request, response);
 	}

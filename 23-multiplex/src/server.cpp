@@ -4,10 +4,10 @@
 
 
 
-class MathServiceImpl : public ::math::MathService::CallbackService
+class MathServiceImpl : public math::MathService::CallbackService
 {
 public:
-	::grpc::ServerUnaryReactor* Calculate2x(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
+	::grpc::ServerUnaryReactor* Calculate2x(::grpc::CallbackServerContext* context, const math::OperandRequest* request, math::ResultResponse* response) 
 	{
 		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
 		response->set_result(2 * request->number());
@@ -15,7 +15,7 @@ public:
 		return reactor;
 	}
 
-	::grpc::ServerUnaryReactor* Calculate3x(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
+	::grpc::ServerUnaryReactor* Calculate3x(::grpc::CallbackServerContext* context, const math::OperandRequest* request, math::ResultResponse* response) 
 	{
 		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
 		response->set_result(3 * request->number());
@@ -23,7 +23,7 @@ public:
 		return reactor;
 	}
 
-	::grpc::ServerUnaryReactor* Calculate4x(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
+	::grpc::ServerUnaryReactor* Calculate4x(::grpc::CallbackServerContext* context, const math::OperandRequest* request, math::ResultResponse* response) 
 	{
 		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
 		response->set_result(4 * request->number());
@@ -31,7 +31,7 @@ public:
 		return reactor;
 	}
 
-	::grpc::ServerUnaryReactor* Calculate5x(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
+	::grpc::ServerUnaryReactor* Calculate5x(::grpc::CallbackServerContext* context, const math::OperandRequest* request, math::ResultResponse* response) 
 	{
 		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
 		response->set_result(5 * request->number());
@@ -39,7 +39,7 @@ public:
 		return reactor;
 	}
 
-	::grpc::ServerUnaryReactor* Calculate6x(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
+	::grpc::ServerUnaryReactor* Calculate6x(::grpc::CallbackServerContext* context, const math::OperandRequest* request, math::ResultResponse* response) 
 	{
 		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
 		response->set_result(6 * request->number());
@@ -47,7 +47,7 @@ public:
 		return reactor;
 	}
 
-	::grpc::ServerUnaryReactor* Calculate7x(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
+	::grpc::ServerUnaryReactor* Calculate7x(::grpc::CallbackServerContext* context, const math::OperandRequest* request, math::ResultResponse* response) 
 	{
 		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
 		response->set_result(7 * request->number());
@@ -55,7 +55,7 @@ public:
 		return reactor;
 	}
 
-	::grpc::ServerUnaryReactor* Calculate8x(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
+	::grpc::ServerUnaryReactor* Calculate8x(::grpc::CallbackServerContext* context, const math::OperandRequest* request, math::ResultResponse* response) 
 	{
 		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
 		response->set_result(8 * request->number());
@@ -63,7 +63,7 @@ public:
 		return reactor;
 	}
 
-	::grpc::ServerUnaryReactor* Calculate9x(::grpc::CallbackServerContext* context, const ::math::OperandRequest* request, ::math::ResultResponse* response) 
+	::grpc::ServerUnaryReactor* Calculate9x(::grpc::CallbackServerContext* context, const math::OperandRequest* request, math::ResultResponse* response) 
 	{
 		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
 		response->set_result(9 * request->number());

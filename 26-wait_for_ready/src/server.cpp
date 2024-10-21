@@ -3,10 +3,10 @@
 #include <proto/sum.grpc.pb.h>
 
 
-class SumServiceImpl : public ::sum::SumService::CallbackService
+class SumServiceImpl : public sum::SumService::CallbackService
 {
 public:
-	::grpc::ServerUnaryReactor* ComputeSum(::grpc::CallbackServerContext* context, const ::sum::SumOperand* request, ::sum::SumResult* response) 
+	::grpc::ServerUnaryReactor* ComputeSum(::grpc::CallbackServerContext* context, const sum::SumOperand* request, sum::SumResult* response) 
 	{
 		::grpc::ServerUnaryReactor* reactor = context->DefaultReactor();
 		response->set_result(request->op1() + request->op2());

@@ -10,7 +10,7 @@
 class SumClientReactor : public grpc::ClientUnaryReactor
 {
 public:
-	SumClientReactor(::sum::SumService::Stub* stub, int op1, int op2)
+	SumClientReactor(sum::SumService::Stub* stub, int op1, int op2)
 		: done(false)
 	{
 		this->request.set_op1(op1);
@@ -37,8 +37,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::sum::SumResult response;
-	::sum::SumOperand request;
+	sum::SumResult response;
+	sum::SumOperand request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -49,7 +49,7 @@ class SumClient
 {
 public:
 	explicit SumClient(std::shared_ptr<grpc::Channel> channel) 
-		: stub(::sum::SumService::NewStub(channel))
+		: stub(sum::SumService::NewStub(channel))
 	{
 	}
 

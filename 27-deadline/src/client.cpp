@@ -11,7 +11,7 @@
 class FibonacciClientReactor : public grpc::ClientUnaryReactor
 {
 public:
-	FibonacciClientReactor(::fibonacci::FibonacciSlowService::Stub* stub, const uint64_t& number)
+	FibonacciClientReactor(fibonacci::FibonacciSlowService::Stub* stub, const uint64_t& number)
 		: done(false)
 	{
 		this->request.set_number(number);
@@ -46,8 +46,8 @@ public:
 
 private:
 	grpc::ClientContext context;
-	::fibonacci::FibonacciListResponse response;
-	::fibonacci::FibonacciRequest request;
+	fibonacci::FibonacciListResponse response;
+	fibonacci::FibonacciRequest request;
 	std::mutex mtx;
 	std::condition_variable cv;
 	grpc::Status status;
@@ -58,7 +58,7 @@ class FibonacciClient
 {
 public:
 	explicit FibonacciClient(std::shared_ptr<grpc::Channel> channel) 
-		: stub(::fibonacci::FibonacciSlowService::NewStub(channel))
+		: stub(fibonacci::FibonacciSlowService::NewStub(channel))
 	{
 	}
 
@@ -79,7 +79,7 @@ public:
 	}
 
 private:
-	std::unique_ptr<::fibonacci::FibonacciSlowService::Stub> stub;
+	std::unique_ptr<fibonacci::FibonacciSlowService::Stub> stub;
 };
 
 int main(int argc, char** argv) 
