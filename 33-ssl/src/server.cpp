@@ -102,6 +102,7 @@ public:
 		std::shared_ptr<grpc::ServerCredentials> credentials = grpc::SslServerCredentials(ssl_opts);
 
 		this->builder.AddListeningPort(this->host, credentials);
+		//this->builder.AddListeningPort(this->host, grpc::InsecureServerCredentials()); // (for demonstration)
 		this->builder.RegisterService(&this->service);
 
 		this->server = this->builder.BuildAndStart();

@@ -30,6 +30,9 @@ public:
 			throw std::runtime_error("Failed to open file: " + file_path);
 		}
 
+		// When gRPC uses SSL/TLS, both the metadata and the request/response data are encrypted.
+		this->context.AddMetadata("token", "AABBCCDDEEFFGG");
+
 		std::vector<char> file_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 		this->request.set_file_data(file_data.data(), file_data.size());
 
@@ -112,6 +115,7 @@ int main(int argc, char** argv)
 		std::shared_ptr<grpc::ChannelCredentials> credentials = grpc::SslCredentials(ssl_opts);
 
 		channel = grpc::CreateCustomChannel(host, credentials, args);
+		//channel = grpc::CreateChannel(host, grpc::InsecureChannelCredentials()); // (for demonstration)
 	}
 	catch(const std::exception& e)
 	{
