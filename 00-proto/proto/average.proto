@@ -1,18 +1,27 @@
 syntax = "proto3";
 
+// Package for average calculations.
 package average;
 
+
+// Message representing a sample value for calculating an average.
 message AvgSample
 {
+	// [required] A sample value to be used in the average calculation.
 	int32 value = 1;
 }
 
+// Message representing the final average result.
 message AvgTotal
 {
+	// [required] The computed average value.
 	float value = 1;
 }
 
+// Service that computes the average of a stream of values.
 service AverageService
 {
+	// RPC method that computes the average of a stream of sample values.
+	// The client sends a stream of AvgSample, and the server returns the final AvgTotal.
 	rpc ComputeAvg(stream AvgSample) returns (AvgTotal) {}
 }

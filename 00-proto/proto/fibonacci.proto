@@ -1,28 +1,49 @@
 syntax = "proto3";
 
+// Package containing Fibonacci services and messages.
 package fibonacci;
 
+
+// Message for a Fibonacci request.
+// This contains the number for which Fibonacci numbers will be calculated.
 message FibonacciRequest
 {
+	// [required] The number for which to calculate Fibonacci.
 	uint64 number = 1;
 }
 
+// Message for a Fibonacci response.
+// This contains a Fibonacci number in the sequence.
 message FibonacciResponse
 {
+	// [required] A Fibonacci number in the sequence.
 	uint64 number = 1;
 }
 
+// Service that provides Fibonacci number streaming.
+// It sends a stream of Fibonacci numbers for a given request.
 service FibonacciService
 {
+	// RPC method that streams Fibonacci numbers in response to a request.
+	// The client sends a FibonacciRequest containing a number, and the server
+	// returns a stream of FibonacciResponse messages, each containing one Fibonacci number.
 	rpc GetFibonacciStream(FibonacciRequest) returns (stream FibonacciResponse) {}
 }
 
+// Message for a response containing a list of Fibonacci numbers.
+// This holds a list of all calculated Fibonacci numbers for a given request.
 message FibonacciListResponse
 {
+	// [required] A list of Fibonacci numbers.
 	repeated uint64 number = 1;
 }
 
+// Service that provides a list of Fibonacci numbers.
+// It returns all Fibonacci numbers up to the requested number at once.
 service FibonacciSlowService
 {
+	// RPC method that returns a list of Fibonacci numbers for a given request.
+	// The client sends a FibonacciRequest containing a number, and the server
+	// returns a FibonacciListResponse containing all Fibonacci numbers up to that number.
 	rpc GetFibonacciList (FibonacciRequest) returns (FibonacciListResponse) {}
 }

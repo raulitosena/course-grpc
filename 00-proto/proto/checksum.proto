@@ -1,23 +1,27 @@
 syntax = "proto3";
 
+// Package for file checksum services.
 package checksum;
 
 
-// Service definition
+// Service that handles file uploads and computes file checksums.
 service FileChecksumService
 {
-	// Method to upload a file and receive the checksum as response
+	// RPC method for uploading a file.
+	// The client sends a FileUploadRequest, and the server returns the checksum in a FileUploadResponse.
 	rpc UploadFile(FileUploadRequest) returns (FileUploadResponse);
 }
 
-// Request message containing the file data
+// Message containing the file data for upload.
 message FileUploadRequest
 {
-	bytes file_data = 1;  // File content in binary format (as a byte stream)
+	// [required] The file data to be uploaded as bytes.
+	bytes file_data = 1;
 }
 
-// Response message containing the SHA-256 checksum
+// Message containing the computed checksum of the uploaded file.
 message FileUploadResponse 
 {
-	string checksum = 1;  // The calculated SHA-256 checksum of the file (hex string)
+	// [required] The computed checksum of the uploaded file as a string.
+	string checksum = 1;
 }

@@ -1,13 +1,20 @@
 syntax = "proto3";
 
+// Package for finding even numbers.
 package evens;
 
+
+// Message representing a number to check for evenness.
 message Number
 {
+	// [required] A number to be checked for evenness.
 	int32 value = 1;
 }
 
+// Service that streams even numbers based on input numbers.
 service EvensService
 {
+	// RPC method that streams even numbers.
+	// The client sends a stream of Number messages, and the server returns a stream of even Number messages.
 	rpc FindEvens(stream Number) returns (stream Number) {}
 }

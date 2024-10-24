@@ -1,40 +1,69 @@
 syntax = "proto3";
 
+// Package for mathematical operations.
 package math;
 
+
+// Message representing a number for square root calculation.
 message SqrtRequest
 {
+	// [required] The number for which the square root is to be calculated.
 	int32 number = 1;
 }
 
+// Message representing the square root result.
 message SqrtResponse
 {
+	// [required] The square root result as a double.
 	double result = 1;
 }
 
+// Service that calculates the square root of a number.
 service SqrtService
 {
+	// RPC method to calculate the square root of a number.
+	// The client sends a SqrtRequest, and the server returns the SqrtResponse with the result.
 	rpc Calculate(SqrtRequest) returns (SqrtResponse) {}
 }
 
+// Message representing a number for multiplication.
 message OperandRequest
 {
+	// [required] The number to be multiplied.
 	int32 number = 1;
 }
 
+// Message representing the result of a multiplication.
 message ResultResponse
 {
+	// [required] The result of the multiplication.
 	int32 result = 1;
 }
 
+// Service that provides various multiplication operations.
 service MathService
 {
+	// RPC method to multiply the input by 2.
 	rpc Calculate2x(OperandRequest) returns (ResultResponse) {}
+	
+	// RPC method to multiply the input by 3.
 	rpc Calculate3x(OperandRequest) returns (ResultResponse) {}
+	
+	// RPC method to multiply the input by 4.
 	rpc Calculate4x(OperandRequest) returns (ResultResponse) {}
+	
+	// RPC method to multiply the input by 5.
 	rpc Calculate5x(OperandRequest) returns (ResultResponse) {}
+	
+	// RPC method to multiply the input by 6.
 	rpc Calculate6x(OperandRequest) returns (ResultResponse) {}
+	
+	// RPC method to multiply the input by 7.
 	rpc Calculate7x(OperandRequest) returns (ResultResponse) {}
+	
+	// RPC method to multiply the input by 8.
 	rpc Calculate8x(OperandRequest) returns (ResultResponse) {}
+	
+	// RPC method to multiply the input by 9.
 	rpc Calculate9x(OperandRequest) returns (ResultResponse) {}
 }

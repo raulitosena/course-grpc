@@ -1,19 +1,33 @@
 syntax = "proto3";
 
+// Package containing the Sum service and related messages.
 package sum;
 
+
+// Message containing operands for a sum operation.
+// Both operands are required for the sum calculation.
 message SumOperand
 {
+	// [required] The first operand for the sum.
 	int32 op1 = 1;
+
+	// [required] The second operand for the sum.
 	int32 op2 = 2;
 }
 
+// Message containing the result of a sum operation.
+// The result is always present in the response.
 message SumResult
 {
+	// [required] The result of the sum operation.
 	int32 result = 1;
 }
 
+// Service that computes the sum of two integers.
 service SumService
 {
+	// RPC method to compute the sum of two integers.
+	// The client sends a SumOperand message with two operands,
+	// and the server returns a SumResult containing the sum.
 	rpc ComputeSum(SumOperand) returns (SumResult) {}
 }
