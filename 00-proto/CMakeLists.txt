@@ -19,6 +19,8 @@ file(GLOB SRCS_CC "${CMAKE_CURRENT_LIST_DIR}/proto/*.cc")
 add_custom_target(${TARGET_PROTOC}
 	COMMAND protoc --proto_path="${CMAKE_CURRENT_LIST_DIR}/proto" --cpp_out="${CMAKE_CURRENT_LIST_DIR}/proto" "${CMAKE_CURRENT_LIST_DIR}/proto/*.proto"
 	COMMAND protoc --proto_path="${CMAKE_CURRENT_LIST_DIR}/proto" --grpc_out="${CMAKE_CURRENT_LIST_DIR}/proto" --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` "${CMAKE_CURRENT_LIST_DIR}/proto/*.proto"
+	COMMAND protoc --proto_path="${CMAKE_CURRENT_LIST_DIR}/proto" --doc_out="${CMAKE_CURRENT_LIST_DIR}/docs" --doc_opt=html,index.html "${CMAKE_CURRENT_LIST_DIR}/proto/*.proto"
+	COMMAND protoc --proto_path="${CMAKE_CURRENT_LIST_DIR}/proto" --doc_out="${CMAKE_CURRENT_LIST_DIR}/docs" --doc_opt=markdown,docs.md "${CMAKE_CURRENT_LIST_DIR}/proto/*.proto"
 	COMMENT "Generating protocol buffers and gRPC services from .proto files..."
 )
 set_property(TARGET ${TARGET_PROTOC} PROPERTY FOLDER ${PROJECT_NAME})

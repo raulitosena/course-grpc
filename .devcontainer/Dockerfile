@@ -18,18 +18,29 @@ RUN mkdir -p $SOURCES_DIR/cmake/build && cd $SOURCES_DIR/cmake/build && mkdir -p
 RUN cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR $SOURCES_DIR
 RUN make -j $(nproc)
 RUN make install
-RUN rm -rf /home/ubuntu/grpc_sources
-RUN rm -rf /home/ubuntu/grpc_build
 ENV PATH="$INSTALL_DIR/bin:$PATH"
 
 USER root
+# Install golang-go
+RUN apt install -y golang-go
+
+# Install net-tools
 RUN apt install -y net-tools
 
+# Install grpc-curl
 RUN apt install wget
 RUN wget https://github.com/fullstorydev/grpcurl/releases/download/v1.9.1/grpcurl_1.9.1_linux_amd64.deb
 RUN dpkg -i grpcurl_1.9.1_linux_amd64.deb
 RUN rm grpcurl_1.9.1_linux_amd64.deb
 
+# Clean temporary files
+RUN rm -rf /home/ubuntu/grpc_sources
+RUN rm -rf /home/ubuntu/grpc_build
+
 USER ubuntu
 WORKDIR /home/ubuntu
 RUN ln -s /workspaces workspaces
+
+# Install protoc-gen-doc
+RUN go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@latest
+RUN echo 'export PATH=$PATH:/home/ubuntu/go/bin' >> /home/ubuntu/.bashrc
